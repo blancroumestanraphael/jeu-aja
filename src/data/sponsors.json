@@ -1,0 +1,13 @@
+{
+  "_note": "Sponsors locaux fictifs (les sponsors réels arrivent en étape 3).",
+  "sponsors": [
+    { "id": "s_sens", "name": "Boulangerie de la Cathédrale", "city": "sens", "budget": 6000, "satisfaction": 60 },
+    { "id": "s_garage", "name": "Garage du Centre", "city": "joigny", "budget": 5000, "satisfaction": 60 },
+    { "id": "s_migennes", "name": "Transports du Canal", "city": "migennes", "budget": 5500, "satisfaction": 60 },
+    { "id": "s_florentin", "name": "Fromagerie de l'Armance", "city": "saint-florentin", "budget": 4500, "satisfaction": 60 },
+    { "id": "s_tonnerre", "name": "Menuiserie de la Fosse Dionne", "city": "tonnerre", "budget": 4000, "satisfaction": 60 },
+    { "id": "s_chablis", "name": "Domaine des Coteaux", "city": "chablis", "budget": 8000, "satisfaction": 60 },
+    { "id": "s_avallon", "name": "Hôtel du Morvan", "city": "avallon", "budget": 5000, "satisfaction": 60 },
+    { "id": "s_toucy", "name": "Terres de Puisaye", "city": "toucy", "budget": 4000, "satisfaction": 60 }
+  ]
+}

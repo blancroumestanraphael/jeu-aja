@@ -1,0 +1,33 @@
+{
+  "kickoff": [
+    "Coup d'envoi {stadium} ! {home} et {away} sont lancés.",
+    "C'est parti {stadium} !"
+  ],
+  "chance": [
+    "{player} tente sa chance de loin, c'est au-dessus.",
+    "Belle combinaison de {team}, {player} frappe… à côté !",
+    "{player} déborde et centre, la défense dégage.",
+    "Tête de {player} sur corner, le gardien capte.",
+    "{player} s'infiltre dans la surface mais se fait reprendre.",
+    "Frappe croisée de {player}, le gardien détourne en corner !",
+    "{player} est trouvé en profondeur, hors-jeu signalé."
+  ],
+  "goal": [
+    "BUT ! {player} ouvre son pied et trompe le gardien ! {score}",
+    "BUT ! {player} reprend de la tête, imparable ! {score}",
+    "BUT pour {team} ! {player} conclut une action collective superbe. {score}",
+    "BUT ! {player} s'arrache et pousse le ballon au fond ! {score}",
+    "BUT ! Frappe enroulée de {player}, lucarne ! {score}"
+  ],
+  "card": [
+    "Carton jaune pour {player} ({team}), intervention en retard.",
+    "{player} prend un avertissement pour une faute tactique.",
+    "L'arbitre sort le jaune : {player} a retenu son adversaire."
+  ],
+  "halftime": [
+    "Mi-temps. {score}"
+  ],
+  "fulltime": [
+    "Coup de sifflet final ! {score}"
+  ]
+}

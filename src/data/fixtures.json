@@ -1,0 +1,280 @@
+{
+  "season": "2026-27",
+  "_note": "Calendrier Ligue 1 2026-27 de l'AJA d'après les annonces publiées (LFP, juin 2026). J12 et J21 déduites (adversaires manquants) ; quelques dates à vérifier.",
+  "fixtures": [
+    {
+      "id": "f_01",
+      "week": 1,
+      "opponent": "lens",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2026-08-22"
+    },
+    {
+      "id": "f_02",
+      "week": 2,
+      "opponent": "angers",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2026-08-29"
+    },
+    {
+      "id": "f_03",
+      "week": 3,
+      "opponent": "lyon",
+      "home": false,
+      "isKeyMatch": true,
+      "realDate": "2026-09-05"
+    },
+    {
+      "id": "f_04",
+      "week": 4,
+      "opponent": "nice",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2026-09-12"
+    },
+    {
+      "id": "f_05",
+      "week": 5,
+      "opponent": "brest",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2026-09-20"
+    },
+    {
+      "id": "f_06",
+      "week": 6,
+      "opponent": "rennes",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2026-10-11"
+    },
+    {
+      "id": "f_07",
+      "week": 7,
+      "opponent": "lehavre",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2026-10-18"
+    },
+    {
+      "id": "f_08",
+      "week": 8,
+      "opponent": "lemans",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2026-10-25"
+    },
+    {
+      "id": "f_09",
+      "week": 9,
+      "opponent": "parisfc",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2026-11-07"
+    },
+    {
+      "id": "f_10",
+      "week": 10,
+      "opponent": "monaco",
+      "home": false,
+      "isKeyMatch": true,
+      "realDate": "2026-11-21"
+    },
+    {
+      "id": "f_11",
+      "week": 11,
+      "opponent": "marseille",
+      "home": true,
+      "isKeyMatch": true,
+      "realDate": "2026-11-29"
+    },
+    {
+      "id": "f_12",
+      "week": 12,
+      "opponent": "strasbourg",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2026-12-02",
+      "uncertain": true
+    },
+    {
+      "id": "f_13",
+      "week": 13,
+      "opponent": "lille",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2026-12-05"
+    },
+    {
+      "id": "f_14",
+      "week": 14,
+      "opponent": "toulouse",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2026-12-12"
+    },
+    {
+      "id": "f_15",
+      "week": 15,
+      "opponent": "lorient",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2027-01-02"
+    },
+    {
+      "id": "f_16",
+      "week": 16,
+      "opponent": "troyes",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2027-01-16"
+    },
+    {
+      "id": "f_17",
+      "week": 17,
+      "opponent": "psg",
+      "home": false,
+      "isKeyMatch": true,
+      "realDate": "2027-01-23"
+    },
+    {
+      "id": "f_18",
+      "week": 18,
+      "opponent": "parisfc",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2027-01-30"
+    },
+    {
+      "id": "f_19",
+      "week": 19,
+      "opponent": "monaco",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2027-02-06"
+    },
+    {
+      "id": "f_20",
+      "week": 20,
+      "opponent": "strasbourg",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2027-02-13"
+    },
+    {
+      "id": "f_21",
+      "week": 21,
+      "opponent": "nice",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2027-02-20",
+      "uncertain": true
+    },
+    {
+      "id": "f_22",
+      "week": 22,
+      "opponent": "lille",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2027-02-27"
+    },
+    {
+      "id": "f_23",
+      "week": 23,
+      "opponent": "angers",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2027-03-06"
+    },
+    {
+      "id": "f_24",
+      "week": 24,
+      "opponent": "psg",
+      "home": true,
+      "isKeyMatch": true,
+      "realDate": "2027-03-13"
+    },
+    {
+      "id": "f_25",
+      "week": 25,
+      "opponent": "troyes",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2027-03-20"
+    },
+    {
+      "id": "f_26",
+      "week": 26,
+      "opponent": "lens",
+      "home": true,
+      "isKeyMatch": true,
+      "realDate": "2027-04-03"
+    },
+    {
+      "id": "f_27",
+      "week": 27,
+      "opponent": "lemans",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2027-04-10"
+    },
+    {
+      "id": "f_28",
+      "week": 28,
+      "opponent": "lorient",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2027-04-17"
+    },
+    {
+      "id": "f_29",
+      "week": 29,
+      "opponent": "marseille",
+      "home": false,
+      "isKeyMatch": true,
+      "realDate": "2027-04-24"
+    },
+    {
+      "id": "f_30",
+      "week": 30,
+      "opponent": "lyon",
+      "home": true,
+      "isKeyMatch": true,
+      "realDate": "2027-05-01"
+    },
+    {
+      "id": "f_31",
+      "week": 31,
+      "opponent": "brest",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2027-05-08"
+    },
+    {
+      "id": "f_32",
+      "week": 32,
+      "opponent": "rennes",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2027-05-16"
+    },
+    {
+      "id": "f_33",
+      "week": 33,
+      "opponent": "toulouse",
+      "home": false,
+      "isKeyMatch": false,
+      "realDate": "2027-05-22"
+    },
+    {
+      "id": "f_34",
+      "week": 34,
+      "opponent": "lehavre",
+      "home": true,
+      "isKeyMatch": false,
+      "realDate": "2027-05-29"
+    }
+  ]
+}

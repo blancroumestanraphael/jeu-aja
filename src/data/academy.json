@@ -1,0 +1,33 @@
+{
+  "_note": "Jeunes du centre : générés (fictifs, isReal=false) — joueurs mineurs, pas de données publiques.",
+  "coaches": [
+    { "id": "c_u15", "name": "Coach des U15", "team": "U15", "trust": 50 },
+    { "id": "c_u17", "name": "Coach des U17", "team": "U17", "trust": 50 },
+    { "id": "c_u19", "name": "Coach des U19", "team": "U19", "trust": 60 }
+  ],
+  "firstNames": ["Lucas","Enzo","Nolan","Mathis","Théo","Yanis","Noah","Adam","Rayan","Louis","Hugo","Ethan","Maël","Sacha","Ilyes","Kylian","Bilal","Mamadou","Moussa","Ibrahim","Axel","Tom","Jules","Gabin","Malo","Timéo","Nathan","Samuel","Aaron","Wassim","Ousmane","Djibril","Baptiste","Clément","Romain","Evan","Lenny","Kenzo","Soan","Elias","Amine","Issa","Lassana","Naël","Arthur","Léo","Marius","Paul"],
+  "lastNames": ["Martin","Bernard","Petit","Durand","Leroy","Moreau","Simon","Laurent","Lefèvre","Michel","Garcia","Roux","Fournier","Girard","Bonnet","Dupont","Lambert","Fontaine","Rousseau","Vincent","Muller","Faure","André","Mercier","Blanc","Guérin","Boyer","Garnier","Chevalier","Diallo","Traoré","Koné","Camara","Cissé","Sylla","Keita","Mendy","Gomis","Da Silva","Pereira","Lopes","Benali","Haddad","Morel","Perrin","Masson","Marchand","Duval","Denis","Lemoine","Picard","Gauthier","Colin","Renard","Arnaud","Brun","Roy","Noël","Aubert","Royer"],
+  "otherCities": [
+    { "id": "auxerre", "name": "Auxerre" },
+    { "id": "dijon", "name": "Dijon" },
+    { "id": "troyes", "name": "Troyes" },
+    { "id": "nevers", "name": "Nevers" },
+    { "id": "paris", "name": "Paris" },
+    { "id": "orleans", "name": "Orléans" }
+  ],
+  "u19Opponents": [
+    { "name": "Académie du Morvan", "level": 60 },
+    { "name": "Étoile de Bourgogne", "level": 63 },
+    { "name": "Union Champenoise", "level": 62 },
+    { "name": "Sporting Val-de-Loire", "level": 64 },
+    { "name": "Lions du Nivernais", "level": 58 },
+    { "name": "Jeunesse Côte-d'Or", "level": 61 },
+    { "name": "Avenir Gâtinais", "level": 57 },
+    { "name": "Racing de la Brie", "level": 65 },
+    { "name": "Entente du Loiret", "level": 59 },
+    { "name": "Stade de Champagne", "level": 66 },
+    { "name": "Cercle Morvandiau", "level": 56 },
+    { "name": "Olympique de Saône", "level": 62 },
+    { "name": "Espoirs du Jura", "level": 60 }
+  ]
+}
