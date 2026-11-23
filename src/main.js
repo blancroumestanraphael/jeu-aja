@@ -12,14 +12,16 @@ import match from './screens/match.js';
 import table from './screens/table.js';
 import gold from './screens/gold.js';
 import welcome from './screens/welcome.js';
+import supporter from './screens/supporter.js';
 
-const SCREENS = { home, team, u19, player, map, messages, match, table, gold, welcome };
+const SCREENS = { home, team, u19, player, map, messages, match, table, gold, supporter, welcome };
 const TABS = [
   { id: 'home', label: 'Accueil', icon: '<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/>' },
   { id: 'team', label: 'Équipe 1', icon: '<circle cx="12" cy="7" r="3.5"/><path d="M5 21c0-4 3-7 7-7s7 3 7 7z"/>' },
   { id: 'u19', label: 'U19', icon: '<circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2 20c0-3.5 2.7-6 6-6s6 2.5 6 6zM14 20c0-2 .6-3.7 1.6-5 2.9-.4 6.4 1.4 6.4 5z"/>' },
   { id: 'map', label: 'Carte', icon: '<path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>' },
   { id: 'messages', label: 'Messages', icon: '<path d="M3 5h18v12H8l-5 4z"/>' },
+  { id: 'supporter', label: 'Supporter', icon: '<circle cx="12" cy="8" r="3.5"/><path d="M4 21c0-4.2 3.4-7 8-7s8 2.8 8 7"/>' },
 ];
 
 const app = document.getElementById('app');
