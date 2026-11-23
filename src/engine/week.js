@@ -10,6 +10,8 @@ import { checkCoachMessages, resolveRivalRisk, surpriseEvent, removeFromTeams } 
 import { decayReputation } from './activities.js';
 import { addYouth } from './setup.js';
 import { applyEvent, ensureCommunity, hasPerk, mobilisationActive } from './community.js';
+import { ensureContracts, checkPromises, expiringContracts, seasonEndYear, MIN_WAGE, wageDemand } from './contracts.js';
+import { fromRealPlayer } from './players.js';
 
 export const SEASON_WEEKS = 34;
 export const TRAVEL_POINTS = 2;
@@ -83,6 +85,7 @@ export function advanceWeek(save0, data) {
   const save = structuredClone(save0);
   if (save.seasonOver) return { save: save0, report: null };
   ensureCommunity(save);
+  ensureContracts(save, data);
   const week = save.week;
   const fixture = fixtureOfWeek(data, week);
   const report = { week, season: save.season, progress: [], newMessages: [], lines: [] };
@@ -135,7 +138,7 @@ export function advanceWeek(save0, data) {
     const pt = ptA(id);
     const mins = pt === 'titulaire' ? 90 : pt === 'remplacant' ? 15 : 0;
     p.minutesThisSeason += mins;
-    if (!p.isReal && mins) {
+    if (!p.isReal && !p.freeAgent && mins) {
       const before = p.minutesA || 0;
       p.minutesA = before + mins;
       if (before < ESTABLISHED_MINUTES && p.minutesA >= ESTABLISHED_MINUTES) {
@@ -162,6 +165,10 @@ export function advanceWeek(save0, data) {
     else if (pt === 'remplacant') p.minutesThisSeason += 20;
     p.morale = clampM(p.morale + (played ? 1 + moraleDelta[u19Outcome] / 2 : pt === 'remplacant' ? 0 : -2));
   }
+
+  // --- Promesses de temps de jeu faites lors des négociations
+  const broken = checkPromises(save);
+  if (broken.length) report.lines.push(`Promesse non tenue : ${broken.map(fullName).join(', ')} (moral en baisse).`);
 
   // --- Progression
   const lvl = save.facilities.terrains;
@@ -212,6 +219,19 @@ export function advanceWeek(save0, data) {
   save.budget += income;
   report.income = income;
 
+  // --- Rappel des fins de contrat (semaine 24)
+  if (week === 24) {
+    const exp = expiringContracts(save).filter((p) => p.contract.type === 'pro');
+    if (exp.length) {
+      save.messages.unshift({
+        id: `ctr_${save.season}`, kind: 'info', week, status: 'pending', waitUntil: week + 99, choices: ['ok'],
+        title: `${exp.length} contrat(s) se terminent en juin`,
+        body: `${exp.map(fullName).join(', ')} : sans prolongation, ils quitteront le club à la fin de la saison. Négociez depuis Club → Contrats.`,
+      });
+      report.newMessages.push(`${exp.length} contrat(s) se terminent en juin`);
+    }
+  }
+
   // --- Messages et événements
   const lost = resolveRivalRisk(save, streamFor(save, 'rival'));
   for (const p of lost) report.lines.push(`Perdu : ${fullName(p)} a signé ailleurs.`);
@@ -248,6 +268,9 @@ export function promoteToFirstTeam(save0, playerId) {
   removeFromTeams(save, playerId);
   p.team = 'A';
   save.teams.A.players.push(playerId);
+  if (!p.contract || p.contract.type === 'formation') {
+    p.contract = { type: 'pro', until: seasonEndYear(save.season) + 2, wage: MIN_WAGE, promise: null, source: 'jeu', signedSeason: save.season };
+  }
   save.goldenBook.push({ playerId, name: fullName(p), season: save.season, week: save.week, from, ovr: overall(p), originCity: p.originCity });
   save.log.push({ week: save.week, text: `${fullName(p)} monte en équipe 1 ! Inscrit au livre d\u2019or.` });
   applyEvent(save, 'promotion', { playerId });
@@ -260,6 +283,20 @@ export function startNewSeason(save0, data) {
   const rng = streamFor(save, 'newseason');
   const [y1] = save.season.split('-').map(Number);
   const lines = [];
+  ensureContracts(save, data);
+  // Fins de contrat et retours de prêt
+  const endYear = seasonEndYear(save.season);
+  for (const id of save.teams.A.players.slice()) {
+    const p = save.players[id];
+    if (p.contract && p.contract.until <= endYear) {
+      removeFromTeams(save, id);
+      const txt = p.contract.type === 'pret' ? `${fullName(p)} retourne à ${p.contract.loanFrom} (fin de prêt).` : `${fullName(p)} quitte le club en fin de contrat.`;
+      lines.push(txt);
+      save.log.push({ week: SEASON_WEEKS, text: txt });
+    }
+  }
+  signFreeAgents(save, data, rng, lines);
+  save.negotiations = {};
   for (const [id, p] of Object.entries(save.players)) {
     if (['A', 'U19', 'U17', 'U15'].includes(p.team)) {
       p.age += 1;
@@ -313,3 +350,28 @@ export function startNewSeason(save0, data) {
 }
 
 export { groupOf };
+
+const MIN_SQUAD = { GK: 2, DEF: 6, MIL: 6, ATT: 4 };
+const FA_POS = { GK: 'G', DEF: 'DC', MIL: 'MC', ATT: 'BU' };
+
+/** Complète l'effectif avec des joueurs libres (fictifs) si les départs l'ont trop réduit. */
+export function signFreeAgents(save, data, rng, lines = []) {
+  const A = save.teams.A;
+  const count = (g) => A.players.filter((id) => groupOf(save.players[id]) === g).length;
+  for (const [g, min] of Object.entries(MIN_SQUAD)) {
+    while (count(g) < min) {
+      const id = `fa_${save.nextId++}`;
+      const p = fromRealPlayer({
+        id, firstName: rng.pick(data.academy.firstNames), lastName: rng.pick(data.academy.lastNames),
+        age: rng.int(24, 30), position: FA_POS[g], ovr: rng.int(64, 69), ovrSource: 'jeu',
+      });
+      p.isReal = false;
+      p.freeAgent = true;
+      p.contract = { type: 'pro', until: seasonEndYear(save.season) + 2, wage: wageDemand(p), promise: null, source: 'jeu' };
+      save.players[id] = p;
+      A.players.push(id);
+      lines.push(`Joueur libre recruté : ${fullName(p)} (${p.position}, note ${overall(p)}).`);
+    }
+  }
+  return lines;
+}

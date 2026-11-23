@@ -122,7 +122,8 @@ export const crest = (size = 36) => `
 export const clubNav = (active) => `
   <nav class="subnav" aria-label="Club">
     <a href="#/team" class="${active === 'team' ? 'on' : ''}">Équipe 1</a>
-    <a href="#/u19" class="${active === 'u19' ? 'on' : ''}">Centre de formation</a>
+    <a href="#/u19" class="${active === 'u19' ? 'on' : ''}">Formation</a>
+    <a href="#/contracts" class="${active === 'contracts' ? 'on' : ''}">Contrats</a>
     <a href="#/table" class="${active === 'table' ? 'on' : ''}">Classement</a>
   </nav>`;
 
@@ -175,7 +176,7 @@ export function evolutionChart({ real, proj, potential = null, realCaption = 'Sa
       <figcaption class="evo-legend">
         <span><i class="lg-real"></i>Réel</span>
         <span><i class="lg-proj"></i>Projection (âge, potentiel, temps de jeu)</span>
-        ${lastProj ? `<b class="${trend > 0 ? 'up' : trend < 0 ? 'down' : ''}">${trend > 0 ? '+' : ''}${Math.round(trend)} en ${proj.length} ans</b>` : ''}
+        ${lastProj ? `<b class="${trend > 0.05 ? 'up' : trend < -0.05 ? 'down' : ''}">${trend > 0 ? '+' : ''}${unit ? fmt(trend) : Math.round(trend)} en ${proj.length} ans</b>` : ''}
       </figcaption>
     </figure>`;
 }

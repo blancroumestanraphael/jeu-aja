@@ -38,7 +38,7 @@ export default {
       <div class="sq-row ${isSel(kind, idx) ? 'sel' : ''}">
         <button class="sq-main" data-kind="${kind}" data-idx="${idx}" data-id="${p.id}">
           <span class="pos pos-${slotPos || p.position}">${slotPos || p.position}</span>
-          <span class="pr-main"><span class="pr-name">${esc(fullName(p))}${slotPos && slotPos !== p.position ? ` <span class="small muted">(${p.position})</span>` : ''}${p.isReal ? '' : ' <span class="tag">Formé</span>'}</span>
+          <span class="pr-main"><span class="pr-name">${esc(fullName(p))}${slotPos && slotPos !== p.position ? ` <span class="small muted">(${p.position})</span>` : ''}${p.isReal || p.freeAgent ? '' : ' <span class="tag">Formé</span>'}</span>
           <span class="pr-sub">${p.age} ans · ${moraleIcon(p.morale)} · ${p.ovrSource === 'ea-fc27' ? 'EA FC 27' : p.isReal ? 'note estimée' : 'centre de formation'}</span></span>
           ${ratingBadge(overall(p))}
         </button>

@@ -1,4 +1,4 @@
-import { esc } from '../ui/components.js';
+import { esc, clubNav } from '../ui/components.js';
 import { sortedTable } from '../engine/league.js';
 import { clubById } from '../engine/week.js';
 

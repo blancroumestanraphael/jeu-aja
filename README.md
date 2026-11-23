@@ -5,6 +5,7 @@ Prototype de jeu mobile (PWA) pour **fidéliser les supporters de l'AJ Auxerre**
 - **Yonne** : 8 communes à découvrir. Chacune a une présentation et une mission (son histoire, son club local) qui débloque le recrutement. La carte montre les lieux de l'AJA et les partenaires locaux. Un classement suit le rayonnement des communes.
 - **Patrimoine** : 5 époques de l'AJA avec une mission historique chacune et des objets de collection à débloquer. On y trouve aussi les moments clés, les figures, le centre de formation et le livre d'or de votre centre.
 - **Supporter** : profil (commune de cœur, génération), ancienneté et série de jours, niveaux qui ont des effets dans le jeu, statistiques, défis hebdomadaires, défis collectifs et succès.
+- **Club → Contrats** : masse salariale, valeur estimée de l'effectif, fins de contrat et prêts. On négocie salaire, durée et rôle promis, avec offre, contre-offre et nombre d'offres limité par semaine. Un premier contrat pro protège un U19 des clubs rivaux. Chaque fiche joueur a une carte « Contrat & valeur » avec la courbe réelle et projetée.
 - **Accueil** : prochain vrai match de l'AJA, question du jour, mission suggérée.
 
 Positionnement, parcours, feuille de route et mesure de l'engagement : voir [`docs/positionnement.md`](docs/positionnement.md).
@@ -49,6 +50,7 @@ Changer de saison = remplacer les fichiers de `src/data`.
 - **Clubs adverses** : niveau fixe par club dans `clubs.json`.
 - **U19 / U17 / U15** : jeunes générés (`isReal: false`) — ce sont des mineurs, sans données publiques.
 - **Sponsors** : commerces locaux fictifs.
+- **Contrats** : prêts réels (Faivre, Archer, Labeau-Lascary), autres fins de contrat estimées. Salaires et valeurs marchandes calculés par le jeu, ce ne sont pas des données Transfermarkt.
 - **Blason** : générique (le logo officiel n'est utilisé qu'avec l'accord du club).
 
 - **Communes et patrimoine** (`territory.json`, `heritage.json`) : textes rédigés pour le prototype à partir de faits publics, à relire et enrichir avec le club et les communes.

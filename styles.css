@@ -485,3 +485,30 @@ td.res-D { color: var(--red); font-weight: 700; background: none; }
 .evo-legend i.lg-proj { border-top: 3px dashed #3d86d0; }
 .evo-legend b { margin-left: auto; }
 .down { color: var(--red); }
+
+/* --- Contrats --- */
+.contract-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.contract-head .eyebrow { margin: 0; font-size: .8rem; letter-spacing: .12em; }
+.contract-v { font-size: 1.6rem; font-weight: 900; color: var(--blue); white-space: nowrap; }
+.contract-actions { display: flex; gap: 8px; margin-top: 10px; }
+.contract-actions .btn { flex: 1; border-radius: 999px; }
+.tag-exp { font-size: .7rem; font-weight: 800; color: #fff; background: var(--red); border-radius: 6px; padding: 1px 6px; }
+.agent { display: flex; gap: 10px; align-items: flex-start; background: #f4f7fc; border-radius: 14px; padding: 10px 12px; }
+.agent-i { font-size: 1.6rem; }
+.agent p { margin: 0; font-size: .9rem; }
+.nego-reply { border-radius: 12px; padding: 10px 12px; font-weight: 600; margin: 10px 0; }
+.nego-reply.accept { background: #e7f6ed; color: #146c3a; }
+.nego-reply.counter { background: #fff7df; color: #7a5500; }
+.nego-reply.refuse { background: #fdecec; color: #9c2a1f; }
+.nego-l { display: block; font-weight: 700; font-size: .85rem; margin: 12px 0 6px; }
+#nego-wage { width: 100%; accent-color: var(--blue); }
+.btn-gold { width: 100%; margin-bottom: 6px; }
+.ctr-row { display: flex; align-items: center; gap: 6px; background: var(--card); border-radius: 12px; box-shadow: var(--shadow); padding-right: 8px; }
+.ctr-row.exp { border-left: 4px solid var(--red); }
+.ctr-main { display: flex; align-items: center; gap: .6rem; flex: 1; min-width: 0; padding: .55rem .6rem; text-decoration: none; color: inherit; }
+.ctr-until { font-weight: 800; font-size: .85rem; color: var(--blue-dark); white-space: nowrap; }
+.ctr-until.exp { color: var(--red); }
+.ctr-sum { margin-top: 10px; }
+.ctr-sum > div { display: flex; flex-direction: column; }
+.ctr-sum b { font-size: 1.2rem; color: var(--blue); }
+.subnav a { font-size: .8rem; }

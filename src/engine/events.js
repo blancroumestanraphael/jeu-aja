@@ -140,7 +140,8 @@ export function surpriseEvent(save, data, rng) {
   let type = rng.pick(types);
   const signed = Object.entries(save.sponsors).filter(([, s]) => s.signed);
   if (type === 'sponsor' && signed.length === 0) type = 'talent';
-  const u19 = save.teams.U19.players.map((id) => save.players[id]);
+  // Un jeune sous contrat pro est protégé des clubs rivaux
+  const u19 = save.teams.U19.players.map((id) => save.players[id]).filter((p) => p.contract?.type !== 'pro');
   if (type === 'rival' && u19.length === 0) type = 'talent';
 
   let msg;

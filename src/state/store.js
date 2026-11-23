@@ -3,6 +3,7 @@
 import { newGame, SAVE_VERSION } from '../engine/setup.js';
 import { firebaseConfig } from './firebase-config.js';
 import { touchDay, isoDay } from '../engine/community.js';
+import { ensureContracts } from '../engine/contracts.js';
 
 const LOCAL_KEY = 'generation-aja-save-v' + SAVE_VERSION;
 
@@ -99,6 +100,7 @@ export function createStore(data) {
       const local = readLocal();
       save = cloud && (!local || cloud.seasonIndex * 100 + cloud.week >= local.seasonIndex * 100 + local.week) ? cloud : local;
       if (save && save.version !== SAVE_VERSION) save = null;
+      if (save) ensureContracts(save, data); // anciennes sauvegardes sans contrats
       return !!save;
     },
     newGame(seed) {

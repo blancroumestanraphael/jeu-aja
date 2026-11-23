@@ -29,7 +29,8 @@ export function projectPlayer(player, { facilitiesLevel = 1, playingTime = 'remp
       p = progressPlayer(p, { facilitiesLevel, playingTime });
     }
     p = ageDecline({ ...p, age: p.age + 1 });
-    out.push({ season: s, age: p.age, ovr: overall(p) });
+    const a = p.attributes;
+    out.push({ season: s, age: p.age, ovr: overall(p), ovrExact: (a.technique + a.physique + a.mental + a.vision) / 4 });
   }
   return out;
 }

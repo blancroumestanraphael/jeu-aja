@@ -14,9 +14,10 @@ import gold from './screens/gold.js';
 import welcome from './screens/welcome.js';
 import supporter from './screens/supporter.js';
 import heritage from './screens/heritage.js';
+import contracts from './screens/contracts.js';
 import { touchDay, isoDay } from './engine/community.js';
 
-const SCREENS = { home, team, u19, player, map, messages, match, table, gold, supporter, heritage, welcome };
+const SCREENS = { home, team, u19, player, map, messages, match, table, gold, supporter, heritage, contracts, welcome };
 // 5 onglets orientés supporter ; les messages passent dans l'en-tête.
 const TABS = [
   { id: 'home', label: 'Accueil', icon: '<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/>' },
@@ -71,7 +72,7 @@ function tabbar(active) {
     </nav>`;
 }
 
-const TAB_OF = { player: null, match: null, messages: null, table: 'team', u19: 'team', gold: 'heritage' };
+const TAB_OF = { player: null, match: null, messages: null, table: 'team', u19: 'team', contracts: 'team', gold: 'heritage' };
 
 let currentCleanup = null;
 
