@@ -98,6 +98,20 @@ export default {
       </section>
 
       <section class="card">
+        <div class="card-head"><h3>La mémoire de votre centre</h3><a href="#/gold" class="link">Ouvrir le livre d’or ›</a></div>
+        <p class="small muted">Une histoire de club se construit aussi avec les parcours de celles et ceux qui grandissent au centre. Retrouvez ici les joueurs que votre gestion a accompagnés jusqu’à l’équipe première.</p>
+        ${s.goldenBook.length ? `
+          <div class="supporter-alumni">
+            ${s.goldenBook.slice().reverse().slice(0, 3).map((entry) => `
+              <a class="supporter-alumni-row" href="#/player/${encodeURIComponent(entry.playerId)}">
+                <span class="supporter-alumni-icon">📖</span>
+                <span><b>${esc(entry.name)}</b><small>Promotion depuis les ${esc(entry.from)} · ${esc(entry.season)}</small></span>
+                <strong>${entry.ovr}</strong>
+              </a>`).join('')}
+          </div>` : '<p class="small muted">Votre premier parcours apparaîtra ici lorsqu’un jeune du centre rejoindra l’équipe première.</p>'}
+      </section>
+
+      <section class="card">
         <div class="card-head"><h3>Vos distinctions</h3><a href="#/gold" class="link">Livre d’or ›</a></div>
         <div class="supporter-badges">
           ${badges.map((b) => `
