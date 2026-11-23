@@ -2,6 +2,7 @@ import { esc, euro, openModal, closeModal, toast, playerRow } from '../ui/compon
 import { ACTIVITIES, PARENT_CHOICES, canDoActivity, doActivity, meetParents } from '../engine/activities.js';
 import { streamFor } from '../engine/rng.js';
 import { fullName } from '../engine/players.js';
+import { awardCommunity } from '../engine/community.js';
 
 let selectedCity = null;
 
@@ -94,6 +95,7 @@ export default {
       const rng = streamFor(s, 'act', selectedCity, activity, s.travelPointsLeft, s.prospects.length);
       const { save, result } = doActivity(s, data, selectedCity, activity, rng);
       if (result.error) return toast(result.error);
+      awardCommunity(save, 15, { activity: true, cityId: selectedCity });
       store.set(save);
       render();
       showResult(result, save);
@@ -147,6 +149,7 @@ function parentsDialog(store, data, cityId, render) {
           const rng = streamFor(store.save, 'parents', ch.dataset.id, ch.dataset.choice);
           const { save, result } = meetParents(store.save, data, ch.dataset.id, ch.dataset.choice, rng);
           if (result.error) { closeModal(); return toast(result.error); }
+          if (result.success) awardCommunity(save, 30, { recruit: true });
           store.set(save);
           render();
           m.innerHTML = `
