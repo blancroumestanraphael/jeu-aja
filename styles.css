@@ -342,3 +342,10 @@ td.res-D { color: var(--red); font-weight: 700; background: none; }
   .supporter-challenge { gap: 6px; padding: 8px; }
   .supporter-challenge .btn { padding: .35rem .45rem; font-size: .72rem; }
 }
+
+.supporter-alumni { display: grid; gap: 6px; margin-top: 10px; }
+.supporter-alumni-row { display: flex; align-items: center; gap: 9px; padding: 9px; border-radius: 10px; background: #f5f8fe; text-decoration: none; color: var(--ink); }
+.supporter-alumni-icon { font-size: 1.25rem; }
+.supporter-alumni-row span:nth-child(2) { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.supporter-alumni-row small { color: var(--muted); font-size: .72rem; }
+.supporter-alumni-row strong { color: var(--blue); }
