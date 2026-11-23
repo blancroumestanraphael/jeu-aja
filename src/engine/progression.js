@@ -34,7 +34,17 @@ export function progressPlayer(player, { facilitiesLevel = 1, playingTime = 'auc
       playingTime,
       age: player.age,
     });
-    attributes[attr] = Math.min(player.potential, Math.round((attributes[attr] + d) * 100) / 100);
+    // Ne jamais raboter un attribut déjà au-dessus du potentiel (cas des pros) : on plafonne seulement la hausse.
+    if (d > 0) attributes[attr] = Math.min(player.potential, Math.round((attributes[attr] + d) * 100) / 100);
   }
+  return { ...player, attributes };
+}
+
+/** Déclin lié à l'âge, appliqué à chaque nouvelle saison (31-32 ans : −1 par attribut, 33 ans et plus : −2). */
+export function ageDecline(player) {
+  const d = player.age >= 33 ? 2 : player.age >= 31 ? 1 : 0;
+  if (!d) return player;
+  const attributes = {};
+  for (const k of ATTRS) attributes[k] = Math.max(30, player.attributes[k] - d);
   return { ...player, attributes };
 }

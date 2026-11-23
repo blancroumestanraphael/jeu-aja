@@ -129,3 +129,53 @@ export const clubNav = (active) => `
 /** Barre de progression simple. */
 export const progressBar = (value, target, cls = '') =>
   `<div class="supporter-progress ${cls}" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${Math.min(value, target)}"><span style="width:${Math.min(100, (value / Math.max(1, target)) * 100)}%"></span></div>`;
+
+/**
+ * Graphique d'évolution : trait plein = évolution réelle, pointillés = projection.
+ * real : [{ v, label? }], proj : [{ v, label }], potential : nombre (ligne de référence).
+ */
+export function evolutionChart({ real, proj, potential = null, realCaption = 'Saison en cours', projCaption = 'Projection 4 ans', unit = '' }) {
+  const W = 320, H = 190, padL = 10, padR = 34, padT = 26, padB = 34;
+  const split = padL + (W - padL - padR) * 0.5;
+  const values = [...real.map((r) => r.v), ...proj.map((p) => p.v), ...(potential ? [potential] : [])];
+  let min = Math.min(...values), max = Math.max(...values);
+  if (max - min < 6) { const mid = (max + min) / 2; min = mid - 3; max = mid + 3; }
+  min -= 1; max += 1;
+  const y = (v) => padT + (1 - (v - min) / (max - min)) * (H - padT - padB);
+  // Réel : de padL à split ; projection : de split à W - padR
+  const rx = (i) => (real.length === 1 ? split - 14 : padL + 8 + (i / (real.length - 1)) * (split - padL - 22));
+  const px = (i) => split + ((i + 1) / proj.length) * (W - padR - split - 6);
+  const realPts = real.map((r, i) => [rx(i), y(r.v)]);
+  const last = realPts[realPts.length - 1];
+  const projPts = [last, ...proj.map((p, i) => [px(i), y(p.v)])];
+  const path = (pts) => pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+  const showRealDots = real.length <= 14;
+  const lastProj = proj[proj.length - 1];
+  const fmt = (v) => `${Math.round(v * 10) / 10}${unit}`;
+  const trend = lastProj ? lastProj.v - real[real.length - 1].v : 0;
+  return `
+    <figure class="evo">
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution réelle de ${fmt(real[0].v)} à ${fmt(real[real.length - 1].v)}, projection à ${lastProj ? fmt(lastProj.v) : '–'} dans ${proj.length} ans">
+        <line x1="${split}" y1="${padT - 14}" x2="${split}" y2="${H - padB}" class="evo-split"/>
+        <line x1="${padL}" y1="${H - padB}" x2="${W - 4}" y2="${H - padB}" class="evo-axis"/>
+        ${potential ? `<line x1="${padL}" y1="${y(potential)}" x2="${W - padR + 4}" y2="${y(potential)}" class="evo-pot"/>
+          <text x="${padL}" y="${y(potential) - 4}" text-anchor="start" class="evo-pot-t">potentiel ${potential}</text>` : ''}
+        <path d="${path(projPts)}" class="evo-proj"/>
+        ${proj.map((p, i) => `<circle cx="${px(i)}" cy="${y(p.v)}" r="4" class="evo-proj-dot"><title>${esc(p.label)} : ${fmt(p.v)}</title></circle>`).join('')}
+        ${real.length > 1 ? `<path d="${path(realPts)}" class="evo-real"/>` : ''}
+        ${showRealDots ? realPts.slice(0, -1).map((p) => `<circle cx="${p[0]}" cy="${p[1]}" r="3" class="evo-real-dot"/>`).join('') : ''}
+        <circle cx="${last[0]}" cy="${last[1]}" r="6" class="evo-now"/>
+        <text x="${last[0] - 4}" y="${last[1] - 11}" text-anchor="middle" class="evo-lbl">${fmt(real[real.length - 1].v)}</text>
+        ${real.length > 1 && Math.round(real[0].v) !== Math.round(real[real.length - 1].v) ? `<text x="${realPts[0][0]}" y="${realPts[0][1] + 16}" text-anchor="start" class="evo-lbl-s">${fmt(real[0].v)}</text>` : ''}
+        ${lastProj ? `<text x="${px(proj.length - 1)}" y="${y(lastProj.v) - 10}" text-anchor="middle" class="evo-lbl proj">${fmt(lastProj.v)}</text>` : ''}
+        ${proj.map((p, i) => `<text x="${px(i)}" y="${H - padB + 13}" text-anchor="middle" class="evo-tick">${esc(p.label)}</text>`).join('')}
+        <text x="${padL}" y="${H - 6}" class="evo-cap">${esc(realCaption)}</text>
+        <text x="${split + 6}" y="${H - 6}" class="evo-cap">${esc(projCaption)}</text>
+      </svg>
+      <figcaption class="evo-legend">
+        <span><i class="lg-real"></i>Réel</span>
+        <span><i class="lg-proj"></i>Projection (âge, potentiel, temps de jeu)</span>
+        ${lastProj ? `<b class="${trend > 0 ? 'up' : trend < 0 ? 'down' : ''}">${trend > 0 ? '+' : ''}${Math.round(trend)} en ${proj.length} ans</b>` : ''}
+      </figcaption>
+    </figure>`;
+}

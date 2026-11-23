@@ -1,4 +1,5 @@
-import { esc, attrGauges, stars, ratingBadge, moraleIcon, sparkline, toast, gauge } from '../ui/components.js';
+import { esc, attrGauges, stars, ratingBadge, moraleIcon, evolutionChart, toast, gauge } from '../ui/components.js';
+import { projectPlayer, currentPlayingTime } from '../engine/projection.js';
 import { overall, fullName, ATTRS, ATTR_LABELS } from '../engine/players.js';
 import { promoteToFirstTeam } from '../engine/week.js';
 import { movePlayer } from '../engine/events.js';
@@ -44,8 +45,8 @@ export default {
       </section>
 
       <section class="card">
-        <h3>Évolution sur la saison</h3>
-        ${sparkline(p.history)}
+        <div class="card-head"><h3>Évolution de la note</h3><span class="chip">${hidden ? '?' : ovr}</span></div>
+        ${hidden ? '<p class="small muted">Attributs partiellement cachés : rencontrez sa famille pour en savoir plus.</p>' : evolution(s, p, ovr)}
       </section>
 
       ${canTrain ? `
@@ -93,3 +94,21 @@ export default {
     });
   },
 };
+
+const PT_LABEL = { titulaire: 'titulaire', remplacant: 'remplaçant', aucun: 'sans temps de jeu' };
+
+function evolution(s, p, ovr) {
+  const hist = p.history || [];
+  const seasons = new Set(hist.map((h) => Math.floor(h[0] / 100)));
+  const real = hist.length ? hist.map((h) => ({ v: h[1] })) : [{ v: ovr }];
+  const pt = currentPlayingTime(s, p);
+  const weeksLeft = s.seasonOver ? 0 : 34 - s.week + 1;
+  const proj = projectPlayer(p, { facilitiesLevel: s.facilities.terrains, playingTime: pt, weeksLeft })
+    .map((x) => ({ v: x.ovr, label: `${x.age} ans` }));
+  return `${evolutionChart({
+    real, proj, potential: p.potential,
+    realCaption: seasons.size > 1 ? 'Historique' : 'Saison en cours',
+    projCaption: 'Projection 4 ans',
+  })}
+  <p class="small muted">Hypothèses : temps de jeu actuel (${PT_LABEL[pt]}), terrains niveau ${s.facilities.terrains}, entraînement équilibré, reste au club. Changez son temps de jeu ou son axe d’entraînement pour faire bouger la courbe.</p>`;
+}

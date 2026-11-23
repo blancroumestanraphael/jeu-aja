@@ -5,7 +5,7 @@ import { ATTRS, overall, fullName, groupOf } from './players.js';
 import { autoLineup, buildMatchTeam } from './lineup.js';
 import { simulateMatch, clubTeam } from './match.js';
 import { applyResult, simulateRound, sortedTable } from './league.js';
-import { progressPlayer } from './progression.js';
+import { progressPlayer, ageDecline } from './progression.js';
 import { checkCoachMessages, resolveRivalRisk, surpriseEvent, removeFromTeams } from './events.js';
 import { decayReputation } from './activities.js';
 import { addYouth } from './setup.js';
@@ -169,7 +169,9 @@ export function advanceWeek(save0, data) {
     const before = overall(p);
     return () => {
       const after = overall(save.players[p.id]);
-      save.players[p.id].history = [...(save.players[p.id].history || []), [save.seasonIndex * 100 + week, after]].slice(-80);
+      const prev = save.players[p.id].history || [];
+      const start = prev.length ? [] : [[save.seasonIndex * 100 + week - 1, before]]; // point de départ
+      save.players[p.id].history = [...prev, ...start, [save.seasonIndex * 100 + week, after]].slice(-80);
       if (after !== before && !p.isReal) report.progress.push({ id: p.id, name: fullName(p), from: before, to: after, team: p.team });
     };
   };
@@ -258,10 +260,11 @@ export function startNewSeason(save0, data) {
   const rng = streamFor(save, 'newseason');
   const [y1] = save.season.split('-').map(Number);
   const lines = [];
-  for (const p of Object.values(save.players)) {
+  for (const [id, p] of Object.entries(save.players)) {
     if (['A', 'U19', 'U17', 'U15'].includes(p.team)) {
       p.age += 1;
       p.minutesThisSeason = 0;
+      save.players[id] = ageDecline(p);
     }
   }
   for (const id of save.teams.U19.players.slice()) {

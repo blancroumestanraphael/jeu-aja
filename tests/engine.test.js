@@ -97,3 +97,33 @@ test('faire monter un U19 en équipe 1 → livre d\'or', () => {
   assert.ok(s2.teams.A.players.includes(id));
   assert.equal(s2.goldenBook.length, 1);
 });
+
+import { projectPlayer } from '../src/engine/projection.js';
+import { ageDecline } from '../src/engine/progression.js';
+
+test('projection : un jeune titulaire progresse vers son potentiel, un vétéran décline', () => {
+  const s = newGame(data, { seed: 21 });
+  const young = s.players[s.teams.U19.players[0]];
+  const pj = projectPlayer(young, { playingTime: 'titulaire' });
+  assert.equal(pj.length, 4);
+  assert.ok(pj[3].ovr > overall(young));
+  assert.ok(pj[3].ovr <= young.potential);
+  assert.ok(projectPlayer(young, { playingTime: 'titulaire' })[3].ovr >= projectPlayer(young, { playingTime: 'aucun' })[3].ovr);
+  const vet = s.players.r_nardi; // 32 ans
+  assert.ok(projectPlayer(vet, { playingTime: 'titulaire' })[3].ovr < overall(vet));
+  assert.equal(overall(ageDecline({ ...vet, age: 25 })), overall(vet));
+});
+
+test('historique : point de départ enregistré à la première semaine', () => {
+  let s = newGame(data, { seed: 22 });
+  s = advanceWeek(s, data).save;
+  const p = s.players[s.teams.U19.players[0]];
+  assert.equal(p.history.length, 2);
+});
+
+test('la progression ne rabote jamais un attribut au-dessus du potentiel (bug Nardi)', () => {
+  const s = newGame(data, { seed: 23 });
+  const before = overall(s.players.r_nardi);
+  const after = advanceWeek(s, data).save.players.r_nardi;
+  assert.equal(overall(after), before);
+});

@@ -34,11 +34,11 @@ export default {
         </button>`;
     };
 
-    const row = (p, kind, idx) => `
+    const row = (p, kind, idx, slotPos = null) => `
       <div class="sq-row ${isSel(kind, idx) ? 'sel' : ''}">
         <button class="sq-main" data-kind="${kind}" data-idx="${idx}" data-id="${p.id}">
-          <span class="pos pos-${p.position}">${p.position}</span>
-          <span class="pr-main"><span class="pr-name">${esc(fullName(p))}${p.isReal ? '' : ' <span class="tag">Formé</span>'}</span>
+          <span class="pos pos-${slotPos || p.position}">${slotPos || p.position}</span>
+          <span class="pr-main"><span class="pr-name">${esc(fullName(p))}${slotPos && slotPos !== p.position ? ` <span class="small muted">(${p.position})</span>` : ''}${p.isReal ? '' : ' <span class="tag">Formé</span>'}</span>
           <span class="pr-sub">${p.age} ans · ${moraleIcon(p.morale)} · ${p.ovrSource === 'ea-fc27' ? 'EA FC 27' : p.isReal ? 'note estimée' : 'centre de formation'}</span></span>
           ${ratingBadge(overall(p))}
         </button>
@@ -56,11 +56,14 @@ export default {
         </label>
         <button class="btn btn-small" data-ctl="auto">Auto</button>
       </div>
-      <p class="hint">${selected ? `<b>${esc(shortName(P(selected.id)))}</b> sélectionné : touchez un autre joueur pour échanger.` : 'Touchez deux joueurs pour les échanger. Note moyenne du XI : <b>' + avg.toFixed(1) + '</b>'}</p>
+      <p class="hint">${selected ? `<b>${esc(shortName(P(selected.id)))}</b> sélectionné : touchez un autre joueur pour échanger. <a href="#/player/${selected.id}">Voir sa fiche ›</a>` : 'Touchez deux joueurs pour les échanger, ou › pour ouvrir une fiche. Note moyenne du XI : <b>' + avg.toFixed(1) + '</b>'}</p>
       <div class="pitch" role="group" aria-label="Composition sur le terrain">
         <div class="pitch-lines"></div>
         ${A.starters.map(token).join('')}
       </div>
+
+      <h3 class="section-title">Titulaires (11)</h3>
+      <div class="list">${A.starters.map((id, i) => row(P(id), 'starter', i, slots[i].pos)).join('')}</div>
 
       <h3 class="section-title">Remplaçants (${A.bench.length}/7)</h3>
       <div class="list">

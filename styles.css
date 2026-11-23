@@ -461,3 +461,27 @@ td.res-D { color: var(--red); font-weight: 700; background: none; }
 .gens li { display: flex; justify-content: space-between; padding: 8px 10px; border-radius: 10px; background: #f6f8fc; }
 .gens li.me { background: var(--blue); color: #fff; }
 .gens li.me .muted { color: rgba(255,255,255,.8); }
+
+/* --- Graphique d'évolution (réel + projection) --- */
+.evo { margin: 4px 0 0; }
+.evo svg { width: 100%; height: auto; display: block; overflow: visible; }
+.evo-axis { stroke: #cfd8e6; stroke-width: 1.5; }
+.evo-split { stroke: #cfd8e6; stroke-width: 1.2; stroke-dasharray: 4 4; }
+.evo-pot { stroke: var(--gold); stroke-width: 1.2; stroke-dasharray: 2 4; }
+.evo-pot-t { font-size: 9px; font-weight: 700; fill: #9a7000; }
+.evo-real { fill: none; stroke: var(--blue-dark); stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; }
+.evo-real-dot { fill: var(--blue-dark); }
+.evo-now { fill: var(--blue-dark); stroke: #fff; stroke-width: 2; }
+.evo-proj { fill: none; stroke: #3d86d0; stroke-width: 3; stroke-dasharray: 6 5; stroke-linecap: round; stroke-linejoin: round; }
+.evo-proj-dot { fill: #3d86d0; stroke: #fff; stroke-width: 1.5; }
+.evo-lbl { font: 800 12px Georgia, "Times New Roman", serif; fill: var(--blue-dark); paint-order: stroke; stroke: #fff; stroke-width: 3px; }
+.evo-lbl.proj { fill: #2f74bd; }
+.evo-lbl-s { font-size: 10px; font-weight: 700; fill: var(--muted); }
+.evo-tick { font-size: 9px; fill: var(--muted); }
+.evo-cap { font: 11px Georgia, "Times New Roman", serif; fill: #44516a; }
+.evo-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: .8rem; color: var(--muted); margin-top: 4px; }
+.evo-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.evo-legend i { display: inline-block; width: 18px; height: 0; border-top: 3px solid var(--blue-dark); border-radius: 2px; }
+.evo-legend i.lg-proj { border-top: 3px dashed #3d86d0; }
+.evo-legend b { margin-left: auto; }
+.down { color: var(--red); }
