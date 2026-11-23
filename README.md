@@ -1,7 +1,13 @@
 # Génération AJA
 
-Jeu mobile (PWA) de gestion de l'AJ Auxerre axé sur la formation et l'engagement des supporters : équipe 1 sur le calendrier de Ligue 1 2026-27, U19 gérés en profondeur, U17/U15 simulés, recrutement dans 8 villes de l'Yonne, « Match de la veille » et espace supporter (XP, défis hebdomadaires, badges et progression territoriale).
+Prototype de jeu mobile (PWA) pour **fidéliser les supporters de l'AJ Auxerre** et les attacher au club et à son territoire. Le cœur ludique est une gestion du club axée sur la formation : équipe 1 sur le vrai calendrier de Ligue 1 2026-27, U19 gérés, U17 et U15 simulés, Match de la veille. Autour de ce cœur :
 
+- **Yonne** : 8 communes à découvrir. Chacune a une présentation et une mission (son histoire, son club local) qui débloque le recrutement. La carte montre les lieux de l'AJA et les partenaires locaux. Un classement suit le rayonnement des communes.
+- **Patrimoine** : 5 époques de l'AJA avec une mission historique chacune et des objets de collection à débloquer. On y trouve aussi les moments clés, les figures, le centre de formation et le livre d'or de votre centre.
+- **Supporter** : profil (commune de cœur, génération), ancienneté et série de jours, niveaux qui ont des effets dans le jeu, statistiques, défis hebdomadaires, défis collectifs et succès.
+- **Accueil** : prochain vrai match de l'AJA, question du jour, mission suggérée.
+
+Positionnement, parcours, feuille de route et mesure de l'engagement : voir [`docs/positionnement.md`](docs/positionnement.md).
 ## Lancer le jeu
 
 Aucun build : HTML/CSS/JavaScript vanilla (modules ES). Il suffit d'un serveur statique :
@@ -20,14 +26,14 @@ Déploiement Netlify : connecter le dépôt GitHub, dossier publié = racine (`n
 npm test
 ```
 
-Tests du moteur et de la progression supporter (Node ≥ 20, sans dépendance) : même graine = même match, formule de progression, saison complète de 34 semaines déterministe, activités de la carte, Match de la veille, montée en équipe 1, attribution XP et récupération unique des défis.
+Tests du moteur et de la progression supporter (Node ≥ 20, sans dépendance) : même graine = même match, formule de progression, saison complète de 34 semaines déterministe, activités de la carte, Match de la veille, montée en équipe 1, missions de commune, défis hebdomadaires par saison, effets des niveaux, mobilisation, formés installés, ancienneté, patrimoine, partenaires.
 
 ## Organisation
 
 ```
 index.html, styles.css, manifest.json, sw.js   PWA (installation + cache hors ligne)
-src/data     contenu de saison en JSON (joueurs, clubs, calendrier, villes, sponsors, centre, commentaires)
-src/engine   simulation pure, progression communautaire, sans DOM, hasard via un générateur à graine
+src/data     contenu en JSON (joueurs, clubs, calendrier, villes, communes, patrimoine, partenaires, centre, commentaires)
+src/engine   simulation pure + territoire, patrimoine et espace supporter (community.js), sans DOM, hasard à graine
 src/state    état de la partie + sauvegarde (localStorage, Firestore si configuré)
 src/screens  un fichier par écran
 src/ui       composants réutilisables (carte joueur, jauges, modale, toast)
@@ -45,7 +51,8 @@ Changer de saison = remplacer les fichiers de `src/data`.
 - **Sponsors** : commerces locaux fictifs.
 - **Blason** : générique (le logo officiel n'est utilisé qu'avec l'accord du club).
 
-**Espace supporter V2 :** progression individuelle locale (XP, niveaux, badges et défis hebdomadaires). Le compteur collectif est pour l'instant propre à une sauvegarde : il ne s'agit pas encore d'un classement ou d'une communauté synchronisée entre supporters. Les contenus historiques officiels et les partenaires réels restent à intégrer après validation du club.
+- **Communes et patrimoine** (`territory.json`, `heritage.json`) : textes rédigés pour le prototype à partir de faits publics, à relire et enrichir avec le club et les communes.
+- **Espace supporter** : la progression est enregistrée dans la sauvegarde (locale ou cloud personnelle). Les défis « collectifs » comptent la progression de la partie. Les classements entre supporters demanderont un serveur (voir `docs/positionnement.md`).
 
 Jeu non officiel, sans lien avec l'AJ Auxerre ni EA SPORTS.
 

@@ -117,3 +117,15 @@ export const crest = (size = 36) => `
     <path d="M20 6 L33 10.5 V22 C33 30 27 36 20 39.5 Z" fill="var(--blue)"/>
     <text x="20" y="27" text-anchor="middle" font-size="10" font-weight="800" fill="#fff" stroke="var(--blue)" stroke-width="0.6" font-family="system-ui">AJA</text>
   </svg>`;
+
+/** Sous-navigation de l'onglet Club. */
+export const clubNav = (active) => `
+  <nav class="subnav" aria-label="Club">
+    <a href="#/team" class="${active === 'team' ? 'on' : ''}">Équipe 1</a>
+    <a href="#/u19" class="${active === 'u19' ? 'on' : ''}">Centre de formation</a>
+    <a href="#/table" class="${active === 'table' ? 'on' : ''}">Classement</a>
+  </nav>`;
+
+/** Barre de progression simple. */
+export const progressBar = (value, target, cls = '') =>
+  `<div class="supporter-progress ${cls}" role="progressbar" aria-valuemin="0" aria-valuemax="${target}" aria-valuenow="${Math.min(value, target)}"><span style="width:${Math.min(100, (value / Math.max(1, target)) * 100)}%"></span></div>`;

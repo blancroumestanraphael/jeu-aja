@@ -1,13 +1,125 @@
 {
-  "_note": "Sponsors locaux fictifs (les sponsors réels arrivent en étape 3).",
+  "_note": "Partenaires locaux FICTIFS du prototype. Structure prête pour de vrais partenaires (étape 3) : mission de découverte, récompense en jeu, récompense réelle éventuelle (à négocier et autoriser avec le club et le partenaire).",
   "sponsors": [
-    { "id": "s_sens", "name": "Boulangerie de la Cathédrale", "city": "sens", "budget": 6000, "satisfaction": 60 },
-    { "id": "s_garage", "name": "Garage du Centre", "city": "joigny", "budget": 5000, "satisfaction": 60 },
-    { "id": "s_migennes", "name": "Transports du Canal", "city": "migennes", "budget": 5500, "satisfaction": 60 },
-    { "id": "s_florentin", "name": "Fromagerie de l'Armance", "city": "saint-florentin", "budget": 4500, "satisfaction": 60 },
-    { "id": "s_tonnerre", "name": "Menuiserie de la Fosse Dionne", "city": "tonnerre", "budget": 4000, "satisfaction": 60 },
-    { "id": "s_chablis", "name": "Domaine des Coteaux", "city": "chablis", "budget": 8000, "satisfaction": 60 },
-    { "id": "s_avallon", "name": "Hôtel du Morvan", "city": "avallon", "budget": 5000, "satisfaction": 60 },
-    { "id": "s_toucy", "name": "Terres de Puisaye", "city": "toucy", "budget": 4000, "satisfaction": 60 }
+    {
+      "id": "s_sens",
+      "name": "Boulangerie de la Cathédrale",
+      "city": "sens",
+      "budget": 6000,
+      "satisfaction": 60,
+      "category": "Boulangerie",
+      "fictional": true,
+      "discovery": "Le fournil prépare chaque samedi les viennoiseries des U13 du club local.",
+      "rewardInGame": {
+        "xp": 40,
+        "badge": "partenaire"
+      },
+      "rewardReal": null
+    },
+    {
+      "id": "s_garage",
+      "name": "Garage du Centre",
+      "city": "joigny",
+      "budget": 5000,
+      "satisfaction": 60,
+      "category": "Garage",
+      "fictional": true,
+      "discovery": "Le garage prête son minibus aux équipes de jeunes pour les déplacements.",
+      "rewardInGame": {
+        "xp": 40,
+        "badge": "partenaire"
+      },
+      "rewardReal": null
+    },
+    {
+      "id": "s_migennes",
+      "name": "Transports du Canal",
+      "city": "migennes",
+      "budget": 5500,
+      "satisfaction": 60,
+      "category": "Transport",
+      "fictional": true,
+      "discovery": "La société de transport achemine le matériel des tournois de jeunes.",
+      "rewardInGame": {
+        "xp": 40,
+        "badge": "partenaire"
+      },
+      "rewardReal": null
+    },
+    {
+      "id": "s_florentin",
+      "name": "Fromagerie de l'Armance",
+      "city": "saint-florentin",
+      "budget": 4500,
+      "satisfaction": 60,
+      "category": "Fromagerie",
+      "fictional": true,
+      "discovery": "La fromagerie fait goûter ses produits lors des fêtes du club.",
+      "rewardInGame": {
+        "xp": 40,
+        "badge": "partenaire"
+      },
+      "rewardReal": null
+    },
+    {
+      "id": "s_tonnerre",
+      "name": "Menuiserie de la Fosse Dionne",
+      "city": "tonnerre",
+      "budget": 4000,
+      "satisfaction": 60,
+      "category": "Artisanat",
+      "fictional": true,
+      "discovery": "La menuiserie a fabriqué les bancs de touche du stade municipal.",
+      "rewardInGame": {
+        "xp": 40,
+        "badge": "partenaire"
+      },
+      "rewardReal": null
+    },
+    {
+      "id": "s_chablis",
+      "name": "Domaine des Coteaux",
+      "city": "chablis",
+      "budget": 8000,
+      "satisfaction": 60,
+      "category": "Viticulture",
+      "fictional": true,
+      "discovery": "Le domaine accueille les partenaires du club pour des visites de cave.",
+      "rewardInGame": {
+        "xp": 40,
+        "badge": "partenaire"
+      },
+      "rewardReal": null
+    },
+    {
+      "id": "s_avallon",
+      "name": "Hôtel du Morvan",
+      "city": "avallon",
+      "budget": 5000,
+      "satisfaction": 60,
+      "category": "Hôtellerie",
+      "fictional": true,
+      "discovery": "L'hôtel héberge les familles venues voir les tournois de jeunes.",
+      "rewardInGame": {
+        "xp": 40,
+        "badge": "partenaire"
+      },
+      "rewardReal": null
+    },
+    {
+      "id": "s_toucy",
+      "name": "Terres de Puisaye",
+      "city": "toucy",
+      "budget": 4000,
+      "satisfaction": 60,
+      "category": "Terroir",
+      "fictional": true,
+      "discovery": "La coopérative fournit les paniers de produits locaux des lotos du club.",
+      "rewardInGame": {
+        "xp": 40,
+        "badge": "partenaire"
+      },
+      "rewardReal": null
+    }
   ]
 }

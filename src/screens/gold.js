@@ -1,6 +1,7 @@
 import { esc } from '../ui/components.js';
 import { cityById } from '../engine/setup.js';
 import { overall } from '../engine/players.js';
+import { recordEvent } from '../engine/community.js';
 
 export default {
   render({ store, data }) {
@@ -17,8 +18,12 @@ export default {
         </a>`;
     }).join('');
     return `
-      <a class="back" href="#/home">‹ Accueil</a>
+      <a class="back" href="#/heritage">‹ Patrimoine</a>
       <h2 class="section-title">Livre d’or du centre</h2>
       ${items || '<p class="card muted">Aucun jeune n’est encore monté en équipe 1. Ouvrez la fiche d’un U19 et touchez « Faire monter en équipe 1 ».</p>'}`;
+  },
+  bind(root, { store }) {
+    // Consulter le livre d'or compte pour l'objectif hebdomadaire « Transmettre la mémoire » (bug corrigé)
+    if (!store.save.community.weekly.heritage) store.set(recordEvent(store.save, 'heritageView'));
   },
 };

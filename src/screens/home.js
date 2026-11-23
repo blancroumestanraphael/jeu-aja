@@ -1,14 +1,22 @@
-import { esc, euro, openModal, closeModal, toast } from '../ui/components.js';
+import { esc, euro, openModal, closeModal, toast, progressBar } from '../ui/components.js';
+import {
+  ensureCommunity, levelFor, xpForLevel, currentStreak, isoDay, dailyQuestionId, answerDaily, WEEKLY_CHALLENGES,
+  challengeKey, mobilisationActive, MOBILISATION_XP,
+} from '../engine/community.js';
+import { missionDone } from '../engine/activities.js';
 import { advanceWeek, startNewSeason, fixtureOfWeek, clubById, u19OpponentOfWeek, SEASON_WEEKS } from '../engine/week.js';
 import { canPlayKeyMatch } from '../engine/keymatch.js';
 import { sortedTable } from '../engine/league.js';
 import { signInWithGoogle } from '../state/store.js';
 
 const FAC = {
-  terrains: { label: 'Terrains d’entraînement', effect: '+10 % de progression par niveau' },
-  internat: { label: 'Internat', effect: '+8 % de réussite avec les parents' },
-  staff: { label: 'Staff de recrutement', effect: 'Jeunes révélés de meilleur potentiel' },
+  terrains: { label: 'Terrains d’entraînement', effect: '+10 % de progression des jeunes par niveau' },
+  internat: { label: 'Internat du centre', effect: 'Les familles font davantage confiance (+8 %)' },
+  staff: { label: 'Réseau de recruteurs dans l’Yonne', effect: 'Jeunes repérés de meilleur potentiel' },
 };
+
+const daysUntil = (iso, today) => Math.round((new Date(iso + 'T12:00:00') - new Date(today + 'T12:00:00')) / 86400000);
+const whenLabel = (n) => (n === 0 ? 'aujourd’hui' : n === 1 ? 'demain' : `dans ${n} jours`);
 export const facilityCost = (lvl) => 8000 * lvl;
 
 const fmtDate = (iso) => new Date(iso + 'T12:00:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -23,6 +31,62 @@ export default {
     const u19o = u19OpponentOfWeek(data, s.week);
     const rep = s.lastReport;
     const pending = s.messages.filter((m) => m.status === 'pending');
+    ensureCommunity(s);
+    const c = s.community;
+    const today = isoDay();
+
+    // Rendez-vous réel : prochain match de l'AJA d'après le calendrier officiel
+    const realNext = data.fixtures.fixtures.find((x) => x.realDate >= today);
+    const realClub = realNext && clubById(data, realNext.opponent);
+    const dIn = realNext ? daysUntil(realNext.realDate, today) : null;
+    const rendezVous = realNext ? `
+      <section class="card rdv">
+        <p class="eyebrow">📅 Rendez-vous · vraie Ligue 1</p>
+        <h3>${realNext.home ? `AJA – ${esc(realClub.name)}` : `${esc(realClub.name)} – AJA`}</h3>
+        <p class="small">${fmtDate(realNext.realDate)} · ${realNext.home ? 'à l’Abbé-Deschamps' : esc(realClub.stadium)} · <b>${whenLabel(dIn)}</b>${realNext.uncertain ? ' (date à confirmer)' : ''}</p>
+        ${realNext.isKeyMatch ? `<p class="small key-note">⭐ Grand match : le Match de la veille s’ouvrira le ${fmtDate(new Date(new Date(realNext.realDate + 'T12:00:00').getTime() - 86400000).toISOString().slice(0, 10))} de 18 h à minuit.</p>` : ''}
+      </section>` : '';
+
+    // Espace supporter en bref
+    const level = levelFor(c.xp);
+    const floor = xpForLevel(level);
+    const done = WEEKLY_CHALLENGES.filter((ch) => { const [v, t] = ch.progress(c.weekly); return v >= t; }).length;
+    const claimable = WEEKLY_CHALLENGES.filter((ch) => { const [v, t] = ch.progress(c.weekly); return v >= t && !c.claimedChallenges.includes(challengeKey(s, ch.id)); }).length;
+    const streak = currentStreak(c.activeDays, today);
+    const supporterStrip = `
+      <a class="card supporter-strip" href="#/supporter">
+        <div class="ss-level"><span>Niv.</span><b>${level}</b></div>
+        <div class="ss-main">
+          <b>${esc(c.displayName)}</b>
+          ${progressBar(c.xp - floor, xpForLevel(level + 1) - floor)}
+          <span class="small muted">Objectifs de la semaine ${done}/${WEEKLY_CHALLENGES.length}${claimable ? ` · <b class="up">${claimable} à récupérer</b>` : ''}${streak > 1 ? ` · 🔥 ${streak} jours de suite` : ''}</span>
+        </div>
+        <span class="chev">›</span>
+      </a>`;
+
+    // Question du jour (patrimoine)
+    const qid = dailyQuestionId(data.heritage, today);
+    const q = data.heritage.questions[qid];
+    const answeredToday = c.daily.date === today && c.daily.answered;
+    const daily = `
+      <section class="card daily">
+        <div class="card-head"><h3>📜 La question du jour</h3><a class="link" href="#/heritage">Patrimoine ›</a></div>
+        ${answeredToday
+          ? `<p>${esc(q.q)}</p><p class="${c.daily.correct ? 'ok' : 'warn'}"><b>${c.daily.correct ? 'Bravo !' : 'Raté…'}</b> Réponse : ${esc(q.choices[q.answer])}. Revenez demain pour une nouvelle question.</p>`
+          : `<p>${esc(q.q)}</p><div class="choices col">${q.choices.map((ch, i) => `<button class="btn" data-daily="${i}">${esc(ch)}</button>`).join('')}</div>`}
+      </section>`;
+
+    // Mission territoriale suggérée
+    const nextMission = data.cities.cities.find((x) => !missionDone(s, x.id));
+    const mission = nextMission ? `
+      <a class="card mission-cta" href="#/map/${nextMission.id}">
+        <span class="mc-i">📍</span>
+        <span><span class="eyebrow">Mission dans l’Yonne</span><br><b>${esc(nextMission.name)} — ${esc(data.territory.communes[nextMission.id].mission.title)}</b><br>
+        <span class="small muted">${esc(data.territory.communes[nextMission.id].tagline)}</span></span>
+        <span class="chev">›</span>
+      </a>` : '';
+    const mobil = f.isKeyMatch && !s.seasonOver ? `
+      <div class="mobil">📣 <b>Mobilisation :</b> ${mobilisationActive(s, data) ? 'objectif atteint, l’équipe jouera avec +5 de moral !' : `gagnez ${MOBILISATION_XP} XP cette semaine pour pousser l’équipe (${c.weekly.xp}/${MOBILISATION_XP}).`}</div>` : '';
 
     const nextMatch = s.seasonOver
       ? `<section class="card hero">
@@ -32,7 +96,7 @@ export default {
           <button class="btn btn-primary btn-big" data-action="new-season">Commencer la saison suivante</button>
         </section>`
       : `<section class="card hero">
-          <p class="eyebrow">Semaine ${s.week} / ${SEASON_WEEKS} · Ligue 1 · J${s.week}</p>
+          <p class="eyebrow">Votre saison · semaine ${s.week} / ${SEASON_WEEKS} · J${s.week}</p>
           <div class="fixture">
             <div class="fx-team"><span class="fx-dot" style="background:var(--blue)"></span>${f.home ? 'AJ Auxerre' : esc(club.name)}</div>
             <div class="fx-vs">vs</div>
@@ -45,12 +109,16 @@ export default {
               ${key.played ? '<span>Match de la veille joué ✔</span>' : key.ok
                 ? `<button class="btn btn-gold" data-action="key">Jouer le Match de la veille</button>${key.demo ? '<span class="small">Mode démo (hors fenêtre de la veille, 18 h–minuit)</span>' : ''}`
                 : `<span class="small">Ouvert la veille du vrai match, de 18 h à minuit.</span>`}
-            </div>` : ''}
+            </div>${mobil}` : ''}
           <p class="small muted center">U19 : AJA ${u19o.home ? 'reçoit' : 'se déplace chez'} ${esc(u19o.name)}</p>
           <button class="btn btn-primary btn-big" data-action="next">Passer à la semaine suivante ▶</button>
         </section>`;
 
     return `
+      ${rendezVous}
+      ${supporterStrip}
+      ${daily}
+      ${mission}
       ${nextMatch}
 
       <section class="grid-3">
@@ -72,7 +140,7 @@ export default {
       </section>` : ''}
 
       <section class="card">
-        <h3>Installations</h3>
+        <h3>Développer le club et son territoire</h3>
         ${Object.entries(FAC).map(([k, v]) => `
           <div class="fac">
             <div><b>${v.label}</b> <span class="lvl">niv. ${s.facilities[k]}</span><br><span class="small muted">${v.effect}</span></div>
@@ -88,13 +156,23 @@ export default {
 
       <section class="links">
         <a class="btn btn-ghost" href="#/table">Classement</a>
-        <button class="btn btn-ghost" data-action="calendar">Calendrier</button>
+        <button class="btn btn-ghost" data-action="calendar">Rendez-vous</button>
         <button class="btn btn-ghost" data-action="settings">Réglages</button>
       </section>`;
   },
 
   bind(root, { store, data, go, render }) {
     root.addEventListener('click', async (e) => {
+      const d = e.target.closest('[data-daily]');
+      if (d) {
+        const { save, correct } = answerDaily(store.save, data.heritage, isoDay(), Number(d.dataset.daily));
+        if (correct !== null) {
+          store.set(save);
+          toast(correct ? 'Bonne réponse ! +15 XP' : 'Raté… +5 XP pour la participation');
+          render();
+        }
+        return;
+      }
       const el = e.target.closest('[data-action]');
       if (!el) return;
       const a = el.dataset.action;
@@ -155,6 +233,9 @@ function showSettings(store, render) {
     ${cloud.enabled && !cloud.user ? '<button class="btn" data-k="login">Se connecter avec Google</button>' : ''}
     <p class="small muted">Graine de la partie : ${s.seed}</p>
     <hr>
+    <p class="small"><b>Mesure de l’engagement</b> (panel de test) : exportez vos statistiques de jeu, sans donnée personnelle.</p>
+    <button class="btn" data-k="export">Exporter mes statistiques (JSON)</button>
+    <hr>
     <button class="btn btn-danger" data-k="reset">Recommencer une nouvelle partie</button>`, {
     onBind(m) {
       m.querySelector('[data-k="demo"]').addEventListener('change', (e) => {
@@ -163,6 +244,14 @@ function showSettings(store, render) {
       });
       m.querySelector('[data-k="login"]')?.addEventListener('click', async () => {
         try { await signInWithGoogle(); store.persist(); closeModal(); toast('Connecté'); } catch { toast('Connexion impossible'); }
+      });
+      m.querySelector('[data-k="export"]').addEventListener('click', () => {
+        const blob = new Blob([JSON.stringify(engagementExport(store.save), null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `generation-aja-engagement-${isoDay()}.json`;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
       });
       m.querySelector('[data-k="reset"]').addEventListener('click', () => {
         if (confirm('Effacer la partie en cours et recommencer ?')) {
@@ -174,4 +263,20 @@ function showSettings(store, render) {
       });
     },
   });
+}
+
+/** Données d'engagement anonymes pour un test auprès d'un panel de supporters. */
+export function engagementExport(s) {
+  const c = s.community;
+  return {
+    exportedAt: new Date().toISOString(),
+    season: s.season, week: s.week,
+    supporter: { level: levelFor(c.xp), xp: c.xp, homeCity: c.homeCity, supporterSince: c.supporterSince },
+    seniority: { firstSeen: c.firstSeen, activeDays: c.activeDays.length, days: c.activeDays },
+    stats: c.stats,
+    territory: { missionsDone: Object.keys(c.missionsDone), visitedCities: c.visitedCities, reputation: Object.fromEntries(Object.entries(s.cities).map(([k, v]) => [k, v.reputation])) },
+    heritage: { erasCompleted: c.heritage.items, answered: Object.keys(c.heritage.answered).length },
+    challengesClaimed: c.claimedChallenges.length,
+    goldenBook: s.goldenBook.length,
+  };
 }

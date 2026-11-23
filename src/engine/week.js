@@ -9,9 +9,18 @@ import { progressPlayer } from './progression.js';
 import { checkCoachMessages, resolveRivalRisk, surpriseEvent, removeFromTeams } from './events.js';
 import { decayReputation } from './activities.js';
 import { addYouth } from './setup.js';
+import { applyEvent, ensureCommunity, hasPerk, mobilisationActive } from './community.js';
 
 export const SEASON_WEEKS = 34;
 export const TRAVEL_POINTS = 2;
+export const ESTABLISHED_MINUTES = 270;
+
+export const travelPointsFor = (save) => TRAVEL_POINTS + (hasPerk(save, 'carnet') ? 1 : 0);
+
+/** Bonus de moral de l'équipe 1 venant des supporters (douzième homme, mobilisation avant un grand match). */
+export function supporterMoraleBonus(save, data, fixture) {
+  return (hasPerk(save, 'douzieme') && fixture.home ? 5 : 0) + (mobilisationActive(save, data) ? 5 : 0);
+}
 
 export const fixtureOfWeek = (data, week) => data.fixtures.fixtures.find((f) => f.week === week);
 export const clubById = (data, id) => data.clubs.clubs.find((c) => c.id === id);
@@ -39,15 +48,17 @@ export function ensureFirstTeamLineup(save) {
   A.bench = (A.bench || []).filter((id) => !A.starters.includes(id)).slice(0, 7);
 }
 
-export function firstTeamMatchTeam(save, data, isHome) {
+export function firstTeamMatchTeam(save, data, isHome, moraleBonus = 0) {
   ensureFirstTeamLineup(save);
   const A = save.teams.A;
   const aux = clubById(data, 'auxerre');
-  return buildMatchTeam({
+  const team = buildMatchTeam({
     id: 'auxerre', name: aux.name, short: aux.short,
     players: A.players.map((id) => save.players[id]),
     starters: A.starters, formation: A.formation, tactic: A.tactic, isHome,
   });
+  team.morale = Math.min(100, team.morale + moraleBonus);
+  return team;
 }
 
 export function u19MatchTeam(save, isHome) {
@@ -71,13 +82,16 @@ const clampM = (m) => Math.max(10, Math.min(100, m));
 export function advanceWeek(save0, data) {
   const save = structuredClone(save0);
   if (save.seasonOver) return { save: save0, report: null };
+  ensureCommunity(save);
   const week = save.week;
   const fixture = fixtureOfWeek(data, week);
   const report = { week, season: save.season, progress: [], newMessages: [], lines: [] };
+  const moraleBonus = supporterMoraleBonus(save, data, fixture);
+  if (moraleBonus) report.lines.push(`Les supporters poussent derrière l\u2019équipe : +${moraleBonus} de moral.`);
 
   // --- Équipe 1 (Ligue 1)
   const club = clubById(data, fixture.opponent);
-  const aja = firstTeamMatchTeam(save, data, fixture.home);
+  const aja = firstTeamMatchTeam(save, data, fixture.home, moraleBonus);
   const opp = clubTeam(club, { isHome: !fixture.home });
   const home = fixture.home ? aja : opp;
   const away = fixture.home ? opp : aja;
@@ -119,8 +133,19 @@ export function advanceWeek(save0, data) {
   for (const id of A.players) {
     const p = save.players[id];
     const pt = ptA(id);
-    if (pt === 'titulaire') p.minutesThisSeason += 90;
-    if (pt === 'remplacant') p.minutesThisSeason += 15;
+    const mins = pt === 'titulaire' ? 90 : pt === 'remplacant' ? 15 : 0;
+    p.minutesThisSeason += mins;
+    if (!p.isReal && mins) {
+      const before = p.minutesA || 0;
+      p.minutesA = before + mins;
+      if (before < ESTABLISHED_MINUTES && p.minutesA >= ESTABLISHED_MINUTES) {
+        applyEvent(save, 'alumniEstablished', { playerId: id });
+        const g = save.goldenBook.find((x) => x.playerId === id);
+        if (g) g.established = true;
+        report.lines.push(`${fullName(p)} s\u2019installe en équipe 1 (${ESTABLISHED_MINUTES} minutes) : un formé de plus dans l\u2019histoire du club !`);
+        save.log.push({ week, text: `${fullName(p)} s\u2019installe en équipe 1.` });
+      }
+    }
     if (pt !== 'aucun') p.morale = clampM(p.morale + moraleDelta[l1Outcome]);
     else p.morale = clampM(p.morale - 1);
     // Jeune monté trop tôt : −5 de moral par match joué
@@ -180,7 +205,8 @@ export function advanceWeek(save0, data) {
       save.log.push({ week, text: `${def.name} quitte l’AJA (satisfaction trop basse).` });
     }
   }
-  income += fixture.home ? 1500 : 0; // billetterie formation
+  if (fixture.home) income += hasPerk(save, 'tribune') ? 1800 : 1500; // billetterie
+  if (hasPerk(save, 'mecene')) income += 500; // club des supporters
   save.budget += income;
   report.income = income;
 
@@ -193,7 +219,8 @@ export function advanceWeek(save0, data) {
 
   // --- Fin de semaine
   decayReputation(save);
-  save.travelPointsLeft = TRAVEL_POINTS;
+  report.xp = applyEvent(save, 'week');
+  save.travelPointsLeft = travelPointsFor(save);
   const pos = sortedTable(save.table).findIndex((r) => r.id === 'auxerre') + 1;
   report.position = pos;
   save.log.push({ week, text: `J${week} : ${home.name} ${l1.homeGoals}-${l1.awayGoals} ${away.name} (${pos}e).` });
@@ -206,6 +233,7 @@ export function advanceWeek(save0, data) {
   } else {
     save.week = week + 1;
   }
+  ensureCommunity(save); // nouveaux objectifs hebdomadaires
   return { save, report };
 }
 
@@ -219,7 +247,8 @@ export function promoteToFirstTeam(save0, playerId) {
   p.team = 'A';
   save.teams.A.players.push(playerId);
   save.goldenBook.push({ playerId, name: fullName(p), season: save.season, week: save.week, from, ovr: overall(p), originCity: p.originCity });
-  save.log.push({ week: save.week, text: `${fullName(p)} monte en équipe 1 ! Inscrit au livre d’or.` });
+  save.log.push({ week: save.week, text: `${fullName(p)} monte en équipe 1 ! Inscrit au livre d\u2019or.` });
+  applyEvent(save, 'promotion', { playerId });
   return save;
 }
 
@@ -270,7 +299,8 @@ export function startNewSeason(save0, data) {
   save.seasonOver = false;
   save.results = [];
   save.keyResults = {};
-  save.travelPointsLeft = TRAVEL_POINTS;
+  ensureCommunity(save);
+  save.travelPointsLeft = travelPointsFor(save);
   const t = {};
   for (const id of Object.keys(save.table)) t[id] = { id, p: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0, form: [] };
   save.table = t;

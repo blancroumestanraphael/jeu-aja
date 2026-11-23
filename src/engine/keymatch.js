@@ -2,7 +2,8 @@
 
 import { createRng, hashSeed } from './rng.js';
 import { clubTeam, newMatchState, playSlices, INSTRUCTIONS, SLICES } from './match.js';
-import { firstTeamMatchTeam, clubById, fixtureOfWeek } from './week.js';
+import { firstTeamMatchTeam, clubById, fixtureOfWeek, supporterMoraleBonus } from './week.js';
+import { applyEvent } from './community.js';
 
 export const KEY_MOMENTS = [3, 9, 14]; // tranches (≈ 15e, 45e, 70e minute)
 
@@ -26,7 +27,7 @@ export function canPlayKeyMatch(save, data, now = new Date()) {
 export function createKeyMatch(save, data) {
   const f = fixtureOfWeek(data, save.week);
   const club = clubById(data, f.opponent);
-  const aja = firstTeamMatchTeam(structuredClone(save), data, f.home);
+  const aja = firstTeamMatchTeam(structuredClone(save), data, f.home, supporterMoraleBonus(save, data, f));
   const opp = clubTeam(club, { isHome: !f.home });
   return {
     fixture: f,
@@ -48,4 +49,13 @@ export function playKeySegment(km, data, instructionKey) {
   const stadium = km.fixture.home ? clubById(data, 'auxerre').stadium : km.club.stadium;
   km.state = playSlices(km.state, km.home, km.away, km.rng, to, { mods, templates: data.commentary, stadium });
   return km.state;
+}
+
+/** Enregistre le résultat du Match de la veille (pur). */
+export function saveKeyResult(save0, km) {
+  const save = structuredClone(save0);
+  const st = km.state;
+  save.keyResults[save.week] = { homeGoals: st.homeGoals, awayGoals: st.awayGoals, events: st.events, choices: km.choices.slice() };
+  applyEvent(save, 'keyMatch');
+  return save;
 }

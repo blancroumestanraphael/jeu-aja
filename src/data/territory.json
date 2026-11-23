@@ -1,0 +1,162 @@
+{
+  "_note": "Contenus territoriaux du prototype (présentations courtes, missions). Textes à relire et valider avec le club et les communes.",
+  "communes": {
+    "sens": {
+      "tagline": "La cité des Sénons, au nord de l'Yonne",
+      "intro": "Sens tient son nom des Sénons, peuple gaulois de la région. Sa cathédrale Saint-Étienne est l'une des toutes premières cathédrales gothiques de France. Deuxième ville du département, c'est un grand vivier de licenciés pour le football icaunais.",
+      "mission": {
+        "title": "Le gardien de la cathédrale",
+        "setup": "Les éducateurs du club local vous accueillent pour une séance avec les jeunes. Avant de commencer, un bénévole vous teste sur sa ville.",
+        "question": "Quel monument fait la fierté de Sens ?",
+        "choices": [
+          "La cathédrale Saint-Étienne, l'une des premières gothiques",
+          "Le château de Guédelon",
+          "L'abbaye de Pontigny"
+        ],
+        "answer": 0,
+        "fact": "Commencée au XIIe siècle, la cathédrale de Sens a inspiré de nombreux édifices gothiques."
+      }
+    },
+    "joigny": {
+      "tagline": "La ville en terrasses au bord de l'Yonne",
+      "intro": "Joigny s'étage sur la rive droite de l'Yonne, avec ses maisons à pans de bois et le vignoble de la Côte Saint-Jacques. La rivière qui la traverse est la même qui longe le stade de l'Abbé-Deschamps à Auxerre.",
+      "mission": {
+        "title": "Au fil de l'eau",
+        "setup": "Un tournoi de jeunes se prépare au bord de la rivière. Pour lancer la journée, le président du club local vous pose une question.",
+        "question": "Quelle rivière traverse à la fois Joigny et Auxerre ?",
+        "choices": [
+          "La Seine",
+          "L'Yonne",
+          "L'Armançon"
+        ],
+        "answer": 1,
+        "fact": "L'Yonne a donné son nom au département et coule au pied de l'Abbé-Deschamps."
+      }
+    },
+    "migennes": {
+      "tagline": "Le carrefour du rail et du canal",
+      "intro": "Migennes s'est développée autour de la gare de Laroche-Migennes, grand nœud ferroviaire de la ligne Paris-Lyon. C'est aussi là que le canal de Bourgogne rejoint l'Yonne.",
+      "mission": {
+        "title": "Terminus Migennes",
+        "setup": "Les cheminots retraités qui encadrent l'école de foot veulent savoir si vous connaissez leur histoire.",
+        "question": "Grâce à quoi Migennes s'est-elle développée ?",
+        "choices": [
+          "Au chemin de fer",
+          "Aux mines de charbon",
+          "À la porcelaine"
+        ],
+        "answer": 0,
+        "fact": "La gare de Laroche-Migennes était un relais majeur de la ligne PLM (Paris-Lyon-Marseille)."
+      }
+    },
+    "saint-florentin": {
+      "tagline": "Au confluent de l'Armance et de l'Armançon",
+      "intro": "Saint-Florentin domine la confluence de l'Armance et de l'Armançon, le long du canal de Bourgogne. La ville a donné son nom à un fromage à pâte molle bien connu des Icaunais.",
+      "mission": {
+        "title": "Un goûter de champion",
+        "setup": "Le goûter d'après-entraînement est offert par une famille de la commune. Une question s'impose avant de passer à table.",
+        "question": "Quel produit porte le nom de Saint-Florentin ?",
+        "choices": [
+          "Un vin pétillant",
+          "Un fromage",
+          "Une moutarde"
+        ],
+        "answer": 1,
+        "fact": "Le saint-florentin est un fromage au lait de vache, cousin du soumaintrain."
+      }
+    },
+    "tonnerre": {
+      "tagline": "La ville de la Fosse Dionne",
+      "intro": "Tonnerre est célèbre pour la Fosse Dionne, une source au bassin d'un bleu-vert intense, et pour son Hôtel-Dieu fondé en 1293 par Marguerite de Bourgogne. Le chevalier d'Éon y est né.",
+      "mission": {
+        "title": "Le mystère de la source",
+        "setup": "Les jeunes du club ont rendez-vous près du lavoir pour une course d'orientation. Leur coach vous lance un défi.",
+        "question": "Quelle source célèbre se trouve à Tonnerre ?",
+        "choices": [
+          "La source de la Seine",
+          "La Fosse Dionne",
+          "La fontaine de Vaucluse"
+        ],
+        "answer": 1,
+        "fact": "Le bassin de la Fosse Dionne est alimenté par une résurgence dont l'origine a longtemps intrigué les plongeurs."
+      }
+    },
+    "chablis": {
+      "tagline": "La porte d'or de la Bourgogne",
+      "intro": "Chablis est connue dans le monde entier pour son vin blanc de chardonnay. Ses coteaux bordent la vallée du Serein, à une vingtaine de kilomètres d'Auxerre.",
+      "mission": {
+        "title": "Entre les vignes",
+        "setup": "Un viticulteur, abonné de l'AJA depuis trente ans, prête une parcelle pour un stage de jeunes. Il vous teste avant.",
+        "question": "Pour quoi Chablis est-elle mondialement connue ?",
+        "choices": [
+          "Son vin blanc",
+          "Son cidre",
+          "Sa faïence"
+        ],
+        "answer": 0,
+        "fact": "Le chablis est produit exclusivement à partir du cépage chardonnay."
+      }
+    },
+    "avallon": {
+      "tagline": "La porte du Morvan",
+      "intro": "Perchée sur un éperon granitique, Avallon garde ses remparts et ouvre sur le massif du Morvan. Vauban est né tout près, dans le village qui porte aujourd'hui son nom.",
+      "mission": {
+        "title": "Sur les remparts",
+        "setup": "Les U13 d'Avallon s'entraînent au pied des remparts. Leur éducatrice vous demande de présenter l'AJA… et sa ville.",
+        "question": "Comment surnomme-t-on Avallon ?",
+        "choices": [
+          "La porte du Morvan",
+          "La Venise de l'Yonne",
+          "La cité des ducs"
+        ],
+        "answer": 0,
+        "fact": "Vauban, l'ingénieur de Louis XIV, est né à Saint-Léger-de-Foucheret, devenu Saint-Léger-Vauban."
+      }
+    },
+    "toucy": {
+      "tagline": "Au cœur de la Puisaye",
+      "intro": "Toucy est une petite ville de Puisaye, terre de potiers et de bocage. Elle a vu naître Pierre Larousse, l'auteur du célèbre dictionnaire ; la romancière Colette est née non loin, à Saint-Sauveur-en-Puisaye.",
+      "mission": {
+        "title": "Le mot juste",
+        "setup": "Le club de Toucy organise une dictée géante… et un match. Vous êtes invité d'honneur.",
+        "question": "Quel auteur de dictionnaire est né à Toucy ?",
+        "choices": [
+          "Émile Littré",
+          "Pierre Larousse",
+          "Paul Robert"
+        ],
+        "answer": 1,
+        "fact": "Pierre Larousse est né à Toucy en 1817."
+      }
+    }
+  },
+  "landmarks": [
+    {
+      "id": "abbe-deschamps",
+      "type": "aja",
+      "name": "Stade de l'Abbé-Deschamps",
+      "x": 197,
+      "y": 222,
+      "icon": "🏟️",
+      "text": "Le stade de l'AJA, au bord de l'Yonne, porte le nom du fondateur du club, l'abbé Ernest-Théodore Deschamps."
+    },
+    {
+      "id": "centre-formation",
+      "type": "aja",
+      "name": "Centre de formation",
+      "x": 173,
+      "y": 241,
+      "icon": "🌱",
+      "text": "Le centre de formation de l'AJA, à Auxerre, a lancé de nombreux joueurs professionnels et internationaux. C'est ici que grandissent vos U15, U17 et U19."
+    },
+    {
+      "id": "cathedrale-auxerre",
+      "type": "patrimoine",
+      "name": "Cathédrale Saint-Étienne d'Auxerre",
+      "x": 173,
+      "y": 195,
+      "icon": "⛪",
+      "text": "La cathédrale d'Auxerre domine la ville et les bords de l'Yonne, à quelques centaines de mètres du stade."
+    }
+  ]
+}

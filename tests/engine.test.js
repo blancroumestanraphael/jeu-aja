@@ -6,7 +6,7 @@ import { simulateMatch, clubTeam } from '../src/engine/match.js';
 import { attributeDelta } from '../src/engine/progression.js';
 import { newGame } from '../src/engine/setup.js';
 import { advanceWeek, startNewSeason, promoteToFirstTeam } from '../src/engine/week.js';
-import { doActivity, meetParents } from '../src/engine/activities.js';
+import { doActivity, meetParents, doMission } from '../src/engine/activities.js';
 import { answerMessage } from '../src/engine/events.js';
 import { createKeyMatch, playKeySegment } from '../src/engine/keymatch.js';
 import { overall } from '../src/engine/players.js';
@@ -66,11 +66,14 @@ test('une saison complète de 34 semaines, déterministe', () => {
 
 test('activités de la carte et parents', () => {
   let s = newGame(data, { seed: 7 });
+  assert.ok(doActivity(s, data, 'joigny', 'tournoi', createRng(3)).result.error, 'recrutement verrouillé avant la mission');
+  s = doMission(s, data, 'joigny', data.territory.communes.joigny.mission.answer).save;
+  s.travelPointsLeft = 2;
   const r = doActivity(s, data, 'joigny', 'tournoi', createRng(3));
   s = r.save;
   assert.equal(r.result.revealed.length, 3);
   assert.equal(s.travelPointsLeft, 1);
-  assert.equal(s.cities.joigny.reputation, 28);
+  assert.equal(s.cities.joigny.reputation, 40); // 20 + 12 (mission) + 8 (tournoi)
   const pid = s.prospects[0].playerId;
   const r2 = meetParents(s, data, pid, s.players[pid].familyPriority, createRng(5));
   assert.equal(r2.save.travelPointsLeft, 0);

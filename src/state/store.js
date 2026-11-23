@@ -2,10 +2,11 @@
 
 import { newGame, SAVE_VERSION } from '../engine/setup.js';
 import { firebaseConfig } from './firebase-config.js';
+import { touchDay, isoDay } from '../engine/community.js';
 
 const LOCAL_KEY = 'generation-aja-save-v' + SAVE_VERSION;
 
-const DATA_FILES = ['players', 'clubs', 'fixtures', 'cities', 'sponsors', 'academy', 'commentary'];
+const DATA_FILES = ['players', 'clubs', 'fixtures', 'cities', 'sponsors', 'academy', 'commentary', 'territory', 'heritage'];
 
 export async function loadData() {
   const base = new URL('../data/', import.meta.url);
@@ -101,7 +102,7 @@ export function createStore(data) {
       return !!save;
     },
     newGame(seed) {
-      save = newGame(data, { seed: seed ?? Math.floor(Math.random() * 1e9), userId: fb?.user?.uid || 'local' });
+      save = touchDay(newGame(data, { seed: seed ?? Math.floor(Math.random() * 1e9), userId: fb?.user?.uid || 'local' }), isoDay());
       store.persist();
     },
     set(next) {

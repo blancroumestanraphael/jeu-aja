@@ -1,153 +1,145 @@
-import { esc, toast } from '../ui/components.js';
-import { ensureCommunity, claimChallenge } from '../engine/community.js';
+// Espace supporter : profil, ancienneté, progression (avec effets en jeu), statistiques, défis, succès.
+import { esc, toast, progressBar } from '../ui/components.js';
+import {
+  ensureCommunity, levelFor, xpForLevel, PERKS, GENERATIONS, generationOf, WEEKLY_CHALLENGES, challengeKey, claimChallenge,
+  collectiveChallenges, achievements, currentStreak, seniorityDays, isoDay,
+} from '../engine/community.js';
 
-const CHALLENGES = [
-  { id: 'territory', title: 'Sur le terrain', description: 'Réalisez une activité dans une commune de l’Yonne.', points: 30, done: (w) => w.activities >= 1, progress: (w) => Math.min(w.activities, 1) },
-  { id: 'discovery', title: 'À la découverte de l’Yonne', description: 'Découvrez une commune que vous n’aviez pas encore visitée.', points: 25, done: (w) => w.newCity, progress: (w) => w.newCity ? 1 : 0 },
-  { id: 'formation', title: 'La relève ajaïste', description: 'Convainquez une famille de rejoindre le centre de formation.', points: 40, done: (w) => w.recruits >= 1, progress: (w) => Math.min(w.recruits, 1) },
-  { id: 'heritage', title: 'Transmettre la mémoire', description: 'Consultez le livre d’or de votre centre de formation.', points: 20, done: (w) => w.viewedHeritage, progress: (w) => w.viewedHeritage ? 1 : 0 },
-];
-
-function levelFor(xp) {
-  return Math.floor(Math.sqrt(Math.max(0, xp) / 100)) + 1;
-}
-function nextLevelXp(level) { return level * level * 100; }
+const YEARS = Array.from({ length: 2026 - 1960 + 1 }, (_, i) => 2026 - i);
 
 export default {
+  keepScroll: true,
   render({ store, data }) {
     const s = store.save;
     ensureCommunity(s);
     const c = s.community;
+    const today = isoDay();
     const level = levelFor(c.xp);
-    const floor = (level - 1) ** 2 * 100;
-    const ceiling = nextLevelXp(level);
-    const progress = Math.max(0, Math.min(100, ((c.xp - floor) / (ceiling - floor)) * 100));
+    const floor = xpForLevel(level);
+    const ceiling = xpForLevel(level + 1);
+    const gen = generationOf(c.supporterSince);
     const cities = data.cities.cities;
-    const cityNames = c.visitedCities.map((id) => cities.find((x) => x.id === id)?.name).filter(Boolean);
-    const claimed = (id) => c.claimedChallenges.includes(`${s.week}:${id}`);
-    const badges = [
-      { icon: '🧭', title: 'Explorateur', text: '3 communes découvertes', unlocked: c.visitedCities.length >= 3 },
-      { icon: '🤝', title: 'Ambassadeur de l’Yonne', text: '8 communes découvertes', unlocked: c.visitedCities.length >= 8 },
-      { icon: '🌱', title: 'Passeur de formation', text: 'Un jeune promu en équipe 1', unlocked: s.goldenBook.length >= 1 },
-      { icon: '⭐', title: 'Supporter engagé', text: '250 points d’engagement', unlocked: c.xp >= 250 },
+    const home = cities.find((x) => x.id === c.homeCity);
+    const ach = achievements(s, data, today);
+    const unlocked = ach.filter((a) => a.ok).length;
+    const stats = [
+      ['📍', Object.keys(c.missionsDone).length, 'missions dans l’Yonne'],
+      ['🌱', c.stats.recruits, 'jeunes recrutés'],
+      ['⭐', c.stats.alumniEstablished, 'formés installés en équipe 1'],
+      ['📜', `${c.stats.quizCorrect}/${c.stats.quizAnswered}`, 'bonnes réponses patrimoine'],
+      ['🌙', c.stats.keyMatches, 'Matchs de la veille'],
+      ['📅', c.stats.weeksPlayed, 'semaines de jeu'],
     ];
-    const completed = CHALLENGES.filter((x) => x.done(c.weekly)).length;
-    const collectiveTarget = 1000;
-    const collectivePct = Math.min(100, (c.collectivePoints / collectiveTarget) * 100);
 
     return `
       <section class="supporter-hero">
-        <p class="eyebrow">COMMUNAUTÉ AJA · SAISON ${esc(s.season)}</p>
-        <h2>Votre aventure ajaïste</h2>
-        <p>Chaque action dans le jeu contribue à votre parcours de supporter et à la découverte du territoire.</p>
-        <form class="supporter-name-form">
-          <label for="supporter-name">Votre nom de supporter</label>
-          <div class="supporter-name-row">
-            <input id="supporter-name" name="name" maxlength="28" value="${esc(c.displayName)}" aria-label="Nom de supporter">
+        <p class="eyebrow">Espace supporter · saison ${esc(s.season)}</p>
+        <h2>${esc(c.displayName)}</h2>
+        <p>${gen ? `${esc(gen.label)} · supporter depuis ${c.supporterSince}` : 'Dites-nous depuis quand vous supportez l’AJA.'}${home ? ` · ♥ ${esc(home.name)}` : ''}</p>
+        <div class="seniority">
+          <div><b>${seniorityDays(c.firstSeen, today)}</b><span>jour(s) d’ancienneté</span></div>
+          <div><b>${c.activeDays.length}</b><span>jour(s) de visite</span></div>
+          <div><b>🔥 ${currentStreak(c.activeDays, today)}</b><span>jour(s) de suite</span></div>
+        </div>
+        <details class="profile-edit">
+          <summary>Modifier mon profil</summary>
+          <form class="supporter-name-form">
+            <label for="sp-name">Nom de supporter</label>
+            <input id="sp-name" name="name" maxlength="28" value="${esc(c.displayName)}">
+            <label for="sp-city">Commune de cœur</label>
+            <select id="sp-city" name="city"><option value="">— Aucune —</option>${cities.map((x) => `<option value="${x.id}" ${x.id === c.homeCity ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+            <label for="sp-year">Supporter de l’AJA depuis</label>
+            <select id="sp-year" name="year"><option value="">—</option>${YEARS.map((y) => `<option ${y === c.supporterSince ? 'selected' : ''}>${y}</option>`).join('')}</select>
             <button class="btn btn-light" type="submit">Enregistrer</button>
-          </div>
-        </form>
+          </form>
+        </details>
       </section>
 
       <section class="card supporter-level">
         <div class="supporter-level-head">
           <div><span class="small muted">NIVEAU SUPPORTER</span><div class="supporter-level-number">${level}</div></div>
-          <div class="supporter-xp"><b>${c.xp.toLocaleString('fr-FR')} XP</b><span class="small muted">Encore ${Math.max(0, ceiling - c.xp)} XP avant le niveau ${level + 1}</span></div>
+          <div class="supporter-xp"><b>${c.xp.toLocaleString('fr-FR')} XP</b><span class="small muted">Encore ${ceiling - c.xp} XP avant le niveau ${level + 1}</span></div>
         </div>
-        <div class="supporter-progress"><span style="width:${progress}%"></span></div>
-        <div class="supporter-level-foot"><span>Niveau ${level}</span><span>Niveau ${level + 1}</span></div>
+        ${progressBar(c.xp - floor, ceiling - floor)}
+        <h4>Ce que votre engagement apporte au club</h4>
+        <ul class="perks">${PERKS.map((p) => `
+          <li class="${level >= p.level ? 'on' : ''}"><span class="perk-i">${p.icon}</span>
+            <span><b>${esc(p.title)}</b> <span class="small muted">· niveau ${p.level}</span><br><span class="small">${esc(p.text)}</span></span>
+            <span class="perk-s">${level >= p.level ? '✓ actif' : '🔒'}</span></li>`).join('')}</ul>
       </section>
 
       <section class="card">
-        <div class="card-head"><h3>Défis de la semaine</h3><span class="chip">${completed}/${CHALLENGES.length} objectifs</span></div>
-        <p class="small muted">Semaine ${s.week} · Réalisez les actions dans le jeu, puis récupérez vos points.</p>
+        <h3>Mes statistiques</h3>
+        <div class="stat-grid">${stats.map(([i, v, l]) => `<div><span>${i}</span><b>${v}</b><small>${l}</small></div>`).join('')}</div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h3>Défis de la semaine</h3><span class="chip">Semaine ${s.week}</span></div>
         <div class="supporter-challenges">
-          ${CHALLENGES.map((challenge) => {
-            const done = challenge.done(c.weekly);
-            const isClaimed = claimed(challenge.id);
+          ${WEEKLY_CHALLENGES.map((ch) => {
+            const [v, t] = ch.progress(c.weekly);
+            const done = v >= t;
+            const claimed = c.claimedChallenges.includes(challengeKey(s, ch.id));
             return `
               <article class="supporter-challenge ${done ? 'is-done' : ''}">
-                <div class="supporter-challenge-icon">${done ? '✓' : '○'}</div>
-                <div class="supporter-challenge-copy">
-                  <b>${esc(challenge.title)}</b>
-                  <p class="small muted">${esc(challenge.description)}</p>
-                  <span class="small supporter-reward">+${challenge.points} XP</span>
-                </div>
-                <button class="btn btn-small ${isClaimed ? 'btn-ghost' : 'btn-primary'}" data-claim="${challenge.id}" data-points="${challenge.points}" ${!done || isClaimed ? 'disabled' : ''}>${isClaimed ? 'Obtenu' : 'Récupérer'}</button>
+                <div class="supporter-challenge-icon">${done ? '✓' : ch.icon}</div>
+                <div class="supporter-challenge-copy"><b>${esc(ch.title)}</b><p class="small muted">${esc(ch.text)}</p><span class="small supporter-reward">+${ch.xp} XP</span></div>
+                <button class="btn btn-small ${claimed ? 'btn-ghost' : 'btn-primary'}" data-claim="${ch.id}" ${!done || claimed ? 'disabled' : ''}>${claimed ? 'Obtenu' : 'Récupérer'}</button>
               </article>`;
           }).join('')}
         </div>
       </section>
 
       <section class="card">
-        <div class="card-head"><h3>Défi collectif de l’Yonne</h3><span class="chip">Prototype</span></div>
-        <p>Faites progresser votre compteur d’engagement en explorant les communes, en accompagnant la formation et en participant à la vie de votre partie.</p>
-        <div class="collective-score"><b>${c.collectivePoints.toLocaleString('fr-FR')}</b><span> / ${collectiveTarget.toLocaleString('fr-FR')} points</span></div>
-        <div class="supporter-progress"><span style="width:${collectivePct}%"></span></div>
-        <p class="small muted">${Math.round(collectivePct)} % de l’objectif · Compteur local à cette sauvegarde, pas encore partagé entre plusieurs supporters.</p>
+        <div class="card-head"><h3>Défis collectifs</h3><span class="chip">Prototype</span></div>
+        <div class="collective">${collectiveChallenges(s, data).map((x) => `
+          <div class="coll ${x.value >= x.target ? 'done' : ''} ${x.id === 'mobilisation' && !x.active ? 'idle' : ''}">
+            <div class="coll-head"><span>${x.icon}</span><b>${esc(x.title)}</b><span class="small">${Math.min(x.value, x.target)}/${x.target}</span></div>
+            <p class="small muted">${esc(x.text)}</p>
+            ${progressBar(x.value, x.target)}
+            <p class="small">🎁 ${esc(x.reward)}</p>
+          </div>`).join('')}</div>
+        <p class="small muted">Dans ce prototype, les défis comptent votre progression. La version connectée additionnera les supporters de toute l’Yonne (classement par commune, défis entre générations), ce qui nécessite un serveur.</p>
       </section>
 
       <section class="card">
-        <div class="card-head"><h3>Votre lien avec le territoire</h3><a href="#/map" class="link">Explorer la carte ›</a></div>
-        <div class="territory-stats">
-          <div><b>${c.visitedCities.length}/${cities.length}</b><span class="small muted">communes découvertes</span></div>
-          <div><b>${s.goldenBook.length}</b><span class="small muted">jeune(s) passé(s) en équipe 1</span></div>
-          <div><b>${Object.values(s.sponsors).filter((x) => x.signed).length}</b><span class="small muted">partenaire(s) du jeu</span></div>
-        </div>
-        <div class="city-pills">${cityNames.length ? cityNames.map((name) => `<span>${esc(name)}</span>`).join('') : '<span class="muted">Aucune commune découverte pour le moment.</span>'}</div>
+        <div class="card-head"><h3>Succès</h3><span class="chip">${unlocked}/${ach.length}</span></div>
+        <div class="supporter-badges">${ach.map((b) => `
+          <div class="supporter-badge ${b.ok ? 'unlocked' : ''}"><span>${b.icon}</span><b>${esc(b.title)}</b><small>${esc(b.text)}</small><em>${b.ok ? 'Débloqué' : 'À débloquer'}</em></div>`).join('')}</div>
       </section>
 
       <section class="card">
-        <div class="card-head"><h3>La mémoire de votre centre</h3><a href="#/gold" class="link">Ouvrir le livre d’or ›</a></div>
-        <p class="small muted">Une histoire de club se construit aussi avec les parcours de celles et ceux qui grandissent au centre. Retrouvez ici les joueurs que votre gestion a accompagnés jusqu’à l’équipe première.</p>
-        ${s.goldenBook.length ? `
-          <div class="supporter-alumni">
-            ${s.goldenBook.slice().reverse().slice(0, 3).map((entry) => `
-              <a class="supporter-alumni-row" href="#/player/${encodeURIComponent(entry.playerId)}">
-                <span class="supporter-alumni-icon">📖</span>
-                <span><b>${esc(entry.name)}</b><small>Promotion depuis les ${esc(entry.from)} · ${esc(entry.season)}</small></span>
-                <strong>${entry.ovr}</strong>
-              </a>`).join('')}
-          </div>` : '<p class="small muted">Votre premier parcours apparaîtra ici lorsqu’un jeune du centre rejoindra l’équipe première.</p>'}
+        <h3>Les générations de supporters</h3>
+        <ul class="gens">${GENERATIONS.map((g) => `<li class="${gen?.id === g.id ? 'me' : ''}"><b>${esc(g.label)}</b><span class="small muted">${g.from ? `${g.from} – ${g.to < 9999 ? g.to : 'aujourd’hui'}` : `jusqu’en ${g.to}`}</span></li>`).join('')}</ul>
+        <p class="small muted">Prochaine étape (version connectée) : des défis entre générations de supporters.</p>
       </section>
 
-      <section class="card">
-        <div class="card-head"><h3>Vos distinctions</h3><a href="#/gold" class="link">Livre d’or ›</a></div>
-        <div class="supporter-badges">
-          ${badges.map((b) => `
-            <div class="supporter-badge ${b.unlocked ? 'unlocked' : ''}">
-              <span>${b.icon}</span><b>${esc(b.title)}</b><small>${esc(b.text)}</small>
-              <em>${b.unlocked ? 'Débloqué' : 'À débloquer'}</em>
-            </div>`).join('')}
-        </div>
-      </section>
-      <p class="small muted supporter-disclaimer">Génération AJA est un prototype indépendant et non officiel. Les points, défis et compteurs collectifs sont enregistrés dans votre sauvegarde locale ou votre sauvegarde cloud personnelle ; ils ne représentent pas une communauté connectée.</p>
-    `;
+      <p class="small muted supporter-disclaimer">Génération AJA est un prototype indépendant et non officiel. Votre progression est enregistrée dans votre sauvegarde (locale ou cloud personnelle) ; elle n’est pas encore partagée avec d’autres supporters.</p>`;
   },
-  bind(root, { store, render, go }) {
-    root.addEventListener('submit', (event) => {
-      if (!event.target.matches('.supporter-name-form')) return;
-      event.preventDefault();
-      const value = String(new FormData(event.target).get('name') || '').trim().slice(0, 28);
-      if (!value) return toast('Choisissez un nom de supporter.');
-      store.update((save) => { ensureCommunity(save); save.community.displayName = value; });
-      toast('Profil supporter enregistré.');
+
+  bind(root, { store, render }) {
+    root.addEventListener('submit', (e) => {
+      if (!e.target.matches('.supporter-name-form')) return;
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const name = String(f.get('name') || '').trim().slice(0, 28);
+      if (!name) return toast('Choisissez un nom de supporter.');
+      store.update((s) => {
+        ensureCommunity(s);
+        s.community.displayName = name;
+        s.community.homeCity = f.get('city') || null;
+        s.community.supporterSince = f.get('year') ? Number(f.get('year')) : null;
+      });
+      toast('Profil enregistré');
       render();
     });
-    root.addEventListener('click', (event) => {
-      const claim = event.target.closest('[data-claim]');
-      if (claim) {
-        const id = claim.dataset.claim;
-        const points = Number(claim.dataset.points);
-        let success = false;
-        store.update((save) => { success = claimChallenge(save, id, points); });
-        if (success) toast(`+${points} XP : défi accompli !`);
-        render();
-        return;
-      }
-      if (event.target.closest('a[href="#/gold"]')) {
-        store.update((save) => { ensureCommunity(save); save.community.weekly.viewedHeritage = true; });
-      }
+    root.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-claim]');
+      if (!b) return;
+      const ch = WEEKLY_CHALLENGES.find((x) => x.id === b.dataset.claim);
+      const { save, ok } = claimChallenge(store.save, ch.id);
+      if (ok) { store.set(save); toast(`+${ch.xp} XP : défi accompli !`); }
+      render();
     });
   },
 };

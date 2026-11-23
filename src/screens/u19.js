@@ -1,4 +1,4 @@
-import { esc, playerRow, stars, moraleIcon, toast } from '../ui/components.js';
+import { esc, clubNav, playerRow, stars, moraleIcon, toast } from '../ui/components.js';
 import { overall, ATTRS, ATTR_LABELS } from '../engine/players.js';
 import { autoLineup } from '../engine/lineup.js';
 
@@ -22,6 +22,7 @@ export default {
       if (view !== 'U19') return playerRow(p);
       const pt = team.playingTime[p.id] || 'aucun';
       return `
+      ${clubNav('u19')}
         <div class="u19-row">
           ${playerRow(p, { sub: `${p.age} ans · ${stars(p.potential)} · ${moraleIcon(p.morale)} · ${p.minutesThisSeason}′` })}
           <div class="u19-ctl">
@@ -36,6 +37,10 @@ export default {
     }).join('');
 
     return `
+      <section class="identity-banner">
+        <b>🌱 Le centre de formation, l\u2019ADN de l\u2019AJA</b>
+        <span>Depuis Guy Roux, l\u2019AJA fait grandir ses joueurs. Chaque jeune que vous installez en équipe 1 entre dans le <a href="#/gold">livre d\u2019or</a>.</span>
+      </section>
       <div class="tabs-inline" role="tablist">
         ${['U19', 'U17', 'U15'].map((t) => `<button role="tab" class="${view === t ? 'on' : ''}" data-view="${t}">${t}${t !== 'U19' ? ' <small>simulé</small>' : ''}</button>`).join('')}
       </div>

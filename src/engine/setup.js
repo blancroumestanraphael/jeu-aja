@@ -4,6 +4,7 @@ import { createRng, hashSeed } from './rng.js';
 import { fromRealPlayer, generateYouth } from './players.js';
 import { autoLineup } from './lineup.js';
 import { initTable } from './league.js';
+import { ensureCommunity } from './community.js';
 
 export const SAVE_VERSION = 1;
 
@@ -98,5 +99,6 @@ export function newGame(data, { seed = (Date.now() % 1e9) | 0, userId = 'local' 
       });
     }
   }
+  ensureCommunity(save);
   return save;
 }

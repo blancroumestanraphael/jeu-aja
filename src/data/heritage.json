@@ -1,0 +1,97 @@
+{
+  "_note": "Contenus patrimoniaux rédigés pour le prototype à partir de faits publics. À relire et enrichir avec le club (archives, photos, témoignages) avant toute diffusion.",
+  "eras": [
+    {
+      "id": "racines",
+      "years": "1905 – 1960",
+      "title": "Les racines",
+      "text": "En 1905, l'abbé Ernest-Théodore Deschamps fonde à Auxerre un patronage : l'Association de la Jeunesse Auxerroise. Pendant un demi-siècle, l'AJA est un club amateur, ancré dans la ville et dans l'Yonne. Le stade du club porte aujourd'hui le nom de son fondateur.",
+      "quiz": ["q_fondation", "q_sigle", "q_fondateur"],
+      "reward": { "item": "Fanion du patronage", "icon": "🚩" }
+    },
+    {
+      "id": "ascension",
+      "years": "1961 – 1980",
+      "title": "L'ascension avec Guy Roux",
+      "text": "En 1961, un jeune Auxerrois de 22 ans, Guy Roux, prend l'équipe en main. Il ne la quittera presque plus pendant plus de quarante ans. Marche après marche, l'AJA grimpe les divisions. En 1979, alors en deuxième division, elle atteint la finale de la Coupe de France face à Nantes. En 1980, elle monte pour la première fois en première division.",
+      "quiz": ["q_roux", "q_finale79", "q_montee"],
+      "reward": { "item": "Bonnet de Guy Roux", "icon": "🧢" }
+    },
+    {
+      "id": "grandes-annees",
+      "years": "1980 – 2005",
+      "title": "Les grandes années",
+      "text": "Installée en première division, l'AJA devient une référence de la formation. Elle remporte la Coupe de France en 1994, réalise le doublé Championnat-Coupe en 1996, puis gagne encore la Coupe en 2003 et 2005. En 1993, elle atteint les demi-finales de la Coupe UEFA. En 1998, trois joueurs de l'AJA sont champions du monde avec l'équipe de France.",
+      "quiz": ["q_doublé", "q_coupes", "q_1998"],
+      "reward": { "item": "Réplique du doublé 1996", "icon": "🏆" }
+    },
+    {
+      "id": "europe-resistance",
+      "years": "2005 – 2022",
+      "title": "Europe, chute et résistance",
+      "text": "Après le départ de Guy Roux en 2005, l'AJA retrouve la Ligue des champions en 2010-2011, dans un groupe avec le Real Madrid, l'AC Milan et l'Ajax. En 2012, après 32 saisons consécutives dans l'élite, le club descend en Ligue 2. Il ne renonce pas : en 2015, encore en Ligue 2, il dispute la finale de la Coupe de France face au PSG.",
+      "quiz": ["q_ldc", "q_32", "q_2015"],
+      "reward": { "item": "Écharpe de la nuit européenne", "icon": "🧣" }
+    },
+    {
+      "id": "retour",
+      "years": "2022 – aujourd'hui",
+      "title": "Le retour",
+      "text": "En 2022, l'AJA retrouve la Ligue 1 au terme d'un barrage irrespirable contre Saint-Étienne, conclu aux tirs au but. Redescendue un an plus tard, elle remonte aussitôt en remportant le championnat de Ligue 2 en 2024. Une nouvelle génération écrit la suite… et c'est là que vous entrez en jeu.",
+      "quiz": ["q_barrage", "q_2024", "q_stade"],
+      "reward": { "item": "Billet du barrage 2022", "icon": "🎟️" }
+    }
+  ],
+  "moments": [
+    { "year": 1905, "title": "Naissance de l'AJA", "text": "L'abbé Deschamps fonde l'Association de la Jeunesse Auxerroise." },
+    { "year": 1961, "title": "Guy Roux prend l'équipe", "text": "Le début d'une aventure de plus de quarante ans sur le banc." },
+    { "year": 1979, "title": "Finale de Coupe en D2", "text": "Club de deuxième division, l'AJA se hisse en finale de la Coupe de France contre Nantes." },
+    { "year": 1980, "title": "Première montée en D1", "text": "Le début de 32 saisons consécutives dans l'élite." },
+    { "year": 1993, "title": "Demi-finale européenne", "text": "L'AJA atteint le dernier carré de la Coupe UEFA face au Borussia Dortmund." },
+    { "year": 1994, "title": "Première Coupe de France", "text": "Le premier trophée majeur de l'histoire du club." },
+    { "year": 1996, "title": "Le doublé", "text": "Champion de France et vainqueur de la Coupe de France la même saison." },
+    { "year": 1998, "title": "Trois champions du monde", "text": "Bernard Diomède, Lionel Charbonnier et Stéphane Guivarc'h jouent à l'AJA quand la France gagne la Coupe du monde." },
+    { "year": 2003, "title": "Coupe de France contre le PSG", "text": "Troisième Coupe de France, gagnée face au Paris Saint-Germain." },
+    { "year": 2005, "title": "La dernière de Guy Roux", "text": "Quatrième Coupe de France, gagnée contre Sedan ; Guy Roux quitte le banc." },
+    { "year": 2010, "title": "Retour en Ligue des champions", "text": "Real Madrid, AC Milan et Ajax à l'Abbé-Deschamps." },
+    { "year": 2012, "title": "La descente", "text": "Fin de 32 saisons consécutives en première division." },
+    { "year": 2015, "title": "Finale en Ligue 2", "text": "Pensionnaire de Ligue 2, l'AJA dispute la finale de la Coupe de France contre le PSG." },
+    { "year": 2022, "title": "Le barrage", "text": "Retour en Ligue 1 aux tirs au but contre Saint-Étienne." },
+    { "year": 2024, "title": "Champion de Ligue 2", "text": "Titre de champion et retour immédiat en Ligue 1." }
+  ],
+  "figures": [
+    { "name": "Abbé Ernest-Théodore Deschamps", "role": "Fondateur (1905)", "icon": "✝️", "text": "Il crée le patronage qui deviendra l'AJA. Le stade porte son nom." },
+    { "name": "Guy Roux", "role": "Entraîneur (1961 – 2005)", "icon": "🧢", "text": "Bâtisseur du club, du monde amateur au doublé 1996 et aux nuits européennes. Symbole d'un football de formation et de proximité." },
+    { "name": "Éric Cantona", "role": "Arrivé adolescent au centre", "icon": "⭐", "text": "Arrivé jeune à Auxerre, il y lance sa carrière professionnelle avant de devenir une légende en Angleterre." },
+    { "name": "Basile Boli", "role": "Formé à l'AJA", "icon": "🛡️", "text": "Défenseur formé à Auxerre, il remporte ensuite la Ligue des champions 1993 avec Marseille." },
+    { "name": "Lionel Charbonnier", "role": "Formé à l'AJA", "icon": "🧤", "text": "Gardien du doublé 1996, champion du monde 1998." },
+    { "name": "Bernard Diomède", "role": "Formé à l'AJA", "icon": "🌍", "text": "Ailier formé au club, champion du monde 1998." },
+    { "name": "Djibril Cissé", "role": "Formé à l'AJA", "icon": "⚡", "text": "Attaquant formé au club, meilleur buteur du championnat de France en 2002 et 2004." },
+    { "name": "Philippe Mexès", "role": "Formé à l'AJA", "icon": "🧱", "text": "Défenseur central révélé à Auxerre avant une longue carrière en Italie." },
+    { "name": "Bacary Sagna", "role": "Formé à l'AJA", "icon": "🏃", "text": "Latéral formé au club, devenu international et finaliste de l'Euro 2016." }
+  ],
+  "academy": "Depuis les années Guy Roux, l'AJA mise sur la formation : recruter tôt, souvent dans l'Yonne et les régions voisines, loger les jeunes, les accompagner à l'école et sur le terrain, puis leur donner leur chance en équipe première. De nombreux internationaux sont passés par le centre auxerrois. Dans Génération AJA, chaque jeune que vous faites monter rejoint cette histoire.",
+  "questions": {
+    "q_fondation": { "q": "En quelle année l'AJA a-t-elle été fondée ?", "choices": ["1905", "1921", "1946"], "answer": 0 },
+    "q_sigle": { "q": "Que signifie le sigle AJA ?", "choices": ["Athlétique Jeunesse d'Auxerre", "Association de la Jeunesse Auxerroise", "Amicale des Joueurs Auxerrois"], "answer": 1 },
+    "q_fondateur": { "q": "Qui a fondé le club ?", "choices": ["Guy Roux", "L'abbé Deschamps", "Le maire d'Auxerre"], "answer": 1 },
+    "q_roux": { "q": "En quelle année Guy Roux prend-il en main l'équipe ?", "choices": ["1961", "1971", "1980"], "answer": 0 },
+    "q_finale79": { "q": "Contre quel club l'AJA, alors en D2, joue-t-elle la finale de la Coupe de France 1979 ?", "choices": ["Saint-Étienne", "Nantes", "Monaco"], "answer": 1 },
+    "q_montee": { "q": "En quelle année l'AJA monte-t-elle pour la première fois en première division ?", "choices": ["1974", "1980", "1987"], "answer": 1 },
+    "q_doublé": { "q": "En quelle année l'AJA réalise-t-elle le doublé Championnat-Coupe ?", "choices": ["1994", "1996", "2003"], "answer": 1 },
+    "q_coupes": { "q": "Combien de Coupes de France l'AJA a-t-elle remportées ?", "choices": ["2", "4", "6"], "answer": 1 },
+    "q_1998": { "q": "Lequel de ces champions du monde 1998 jouait à l'AJA cette année-là ?", "choices": ["Stéphane Guivarc'h", "Zinédine Zidane", "Didier Deschamps"], "answer": 0 },
+    "q_ldc": { "q": "Quel club faisait partie du groupe de l'AJA en Ligue des champions 2010-2011 ?", "choices": ["FC Barcelone", "Real Madrid", "Bayern Munich"], "answer": 1 },
+    "q_32": { "q": "Combien de saisons consécutives l'AJA a-t-elle passées en première division avant 2012 ?", "choices": ["20", "32", "45"], "answer": 1 },
+    "q_2015": { "q": "Contre qui l'AJA joue-t-elle la finale de la Coupe de France 2015 ?", "choices": ["PSG", "Lyon", "Guingamp"], "answer": 0 },
+    "q_barrage": { "q": "Contre quel club l'AJA gagne-t-elle le barrage de 2022 ?", "choices": ["Lorient", "Saint-Étienne", "Metz"], "answer": 1 },
+    "q_2024": { "q": "Comment l'AJA revient-elle en Ligue 1 en 2024 ?", "choices": ["Par un barrage", "En étant championne de Ligue 2", "Sur tapis vert"], "answer": 1 },
+    "q_stade": { "q": "Quel est le nom du stade de l'AJA ?", "choices": ["Stade de l'Abbé-Deschamps", "Stade Guy-Roux", "Stade de l'Yonne"], "answer": 0 },
+    "q_cisse": { "q": "Quel attaquant formé à l'AJA a été meilleur buteur du championnat en 2002 et 2004 ?", "choices": ["Djibril Cissé", "Thierry Henry", "Sylvain Wiltord"], "answer": 0 },
+    "q_boli": { "q": "Avec quel club Basile Boli, formé à l'AJA, gagne-t-il la Ligue des champions 1993 ?", "choices": ["Marseille", "Monaco", "Paris SG"], "answer": 0 },
+    "q_cantona": { "q": "Dans quel pays Éric Cantona, lancé à l'AJA, est-il devenu une légende ?", "choices": ["Espagne", "Angleterre", "Italie"], "answer": 1 },
+    "q_ue93": { "q": "Quel club élimine l'AJA en demi-finale de la Coupe UEFA 1993 ?", "choices": ["Borussia Dortmund", "Juventus", "Ajax"], "answer": 0 },
+    "q_2005": { "q": "Contre quel club l'AJA gagne-t-elle la Coupe de France 2005, dernier match de Guy Roux ?", "choices": ["Sedan", "Nantes", "Lens"], "answer": 0 }
+  },
+  "dailyPool": ["q_cisse", "q_boli", "q_cantona", "q_ue93", "q_2005", "q_stade", "q_fondation", "q_doublé", "q_barrage", "q_2024", "q_roux", "q_coupes", "q_32", "q_ldc"]
+}

@@ -1,5 +1,5 @@
 import { esc, toast } from '../ui/components.js';
-import { createKeyMatch, playKeySegment, canPlayKeyMatch, KEY_MOMENTS } from '../engine/keymatch.js';
+import { createKeyMatch, playKeySegment, canPlayKeyMatch, KEY_MOMENTS, saveKeyResult } from '../engine/keymatch.js';
 import { INSTRUCTIONS } from '../engine/match.js';
 import { advanceWeek } from '../engine/week.js';
 
@@ -94,6 +94,7 @@ export default {
         ${r.progress.length ? `<p><b>Progression des jeunes :</b> ${r.progress.length} joueur(s) ont gagné en note.</p>` : ''}
         ${r.newMessages.length ? `<p><b>Nouveaux messages :</b> ${r.newMessages.map(esc).join(' · ')}</p>` : ''}
         ${r.lines.map((l) => `<p class="small">${esc(l)}</p>`).join('')}
+        ${r.xp ? `<p class="small ok">+${r.xp} XP de fidélité · <a href="#/supporter">espace supporter</a></p>` : ''}
         <div class="choices">
           <a class="btn btn-primary" href="#/home">Continuer</a>
           ${r.newMessages.length ? '<a class="btn" href="#/messages">Lire les messages</a>' : ''}
@@ -127,13 +128,12 @@ export default {
 
     const finish = () => {
       const st = km.state;
-      store.update((s) => {
-        s.keyResults[s.week] = { homeGoals: st.homeGoals, awayGoals: st.awayGoals, events: st.events, choices: km.choices.slice() };
-      });
+      store.set(saveKeyResult(store.save, km));
       const aja = km.ajaSide === 'home' ? st.homeGoals : st.awayGoals;
       const opp = km.ajaSide === 'home' ? st.awayGoals : st.homeGoals;
       panel.innerHTML = `
         <h3>${aja > opp ? '🎉 Victoire !' : aja < opp ? 'Défaite…' : 'Match nul'} ${st.homeGoals}-${st.awayGoals}</h3>
+        <p class="small ok">+25 XP supporter · Match de la veille joué</p>
         <p>Ce résultat est enregistré pour la J${store.save.week}. Consignes : ${km.choices.map((c) => INSTRUCTIONS[c].label).join(' → ')}.</p>
         <div class="choices">
           <button class="btn btn-primary" data-action="advance">Passer à la semaine suivante ▶</button>

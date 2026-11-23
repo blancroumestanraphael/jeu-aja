@@ -2,6 +2,12 @@
 
 import { addYouth, cityById } from './setup.js';
 import { fullName } from './players.js';
+import { applyEvent, ensureCommunity, hasPerk } from './community.js';
+
+export const RECRUIT_ACTIVITIES = ['coach', 'tournoi', 'parents'];
+export const MISSION_REP = 12;
+const yonneIds = (data) => data.cities.cities.map((c) => c.id);
+export const missionDone = (save, cityId) => !!save.community?.missionsDone?.[cityId];
 
 export const ACTIVITIES = {
   coach: { label: 'Rencontrer le coach local', rep: 10, icon: '🤝', desc: '+réputation, révèle 1 jeune prometteur' },
@@ -32,6 +38,9 @@ export function canDoActivity(save, cityId, activity) {
   const a = ACTIVITIES[activity];
   if (!a) return { ok: false, reason: 'Activité inconnue.' };
   if (a.cost && save.budget < a.cost) return { ok: false, reason: 'Budget insuffisant.' };
+  if (RECRUIT_ACTIVITIES.includes(activity) && !missionDone(save, cityId)) {
+    return { ok: false, reason: 'Accomplissez d\u2019abord la mission de la commune pour gagner la confiance des clubs locaux.' };
+  }
   if (activity === 'parents' && !save.prospects.some((x) => x.cityId === cityId)) {
     return { ok: false, reason: 'Aucun jeune repéré ici : faites d’abord un tournoi ou voyez le coach local.' };
   }
@@ -100,7 +109,8 @@ export function doActivity(save0, data, cityId, activity, rng) {
   addReputation(save, cityId, a.rep);
   lines.push(`Réputation à ${city.name} : ${save.cities[cityId].reputation} (+${a.rep}).`);
   save.log.push({ week: save.week, text: `${city.name} — ${a.label}.` });
-  return { save, result: { title: a.label, lines, revealed } };
+  const xp = applyEvent(save, 'activity', { cityId, activity });
+  return { save, result: { title: a.label, lines, revealed, xp } };
 }
 
 /** Rencontre avec les parents d'un jeune repéré. */
@@ -112,10 +122,13 @@ export function meetParents(save0, data, prospectId, choice, rng) {
   const p = save.players[prospectId];
   const rep = save.cities[pr.cityId].reputation;
   save.travelPointsLeft--;
-  const prob = Math.min(0.95, 0.3 + rep / 200 + (save.facilities.internat - 1) * 0.08 + (choice === p.familyPriority ? 0.3 : 0));
+  const perk = hasPerk(save, 'ambassadeur') ? 0.05 : 0;
+  const prob = Math.min(0.95, 0.3 + rep / 200 + (save.facilities.internat - 1) * 0.08 + perk + (choice === p.familyPriority ? 0.3 : 0));
   const success = rng.chance(prob);
   const lines = [];
   addReputation(save, pr.cityId, ACTIVITIES.parents.rep);
+  let xp = applyEvent(save, 'activity', { cityId: pr.cityId, activity: 'parents' });
+  if (success) xp += applyEvent(save, 'recruit', { cityId: p.originCity }, yonneIds(data));
   if (success) {
     const team = p.age >= 17 ? 'U19' : p.age >= 15 ? 'U17' : 'U15';
     p.team = team;
@@ -127,7 +140,7 @@ export function meetParents(save0, data, prospectId, choice, rng) {
   } else {
     lines.push(`La famille de ${fullName(p)} hésite encore… Elle semblait surtout attentive à ${hint(p.familyPriority)}.`);
   }
-  return { save, result: { title: 'Rencontre avec les parents', lines, success } };
+  return { save, result: { title: 'Rencontre avec les parents', lines, success, xp } };
 }
 
 function hint(priority) {
@@ -140,4 +153,57 @@ export function decayReputation(save) {
     if (!c.visitedThisWeek) c.reputation = clampRep(c.reputation - 1);
     c.visitedThisWeek = false;
   }
+}
+
+// --- Expérience territoriale --------------------------------------------------
+
+/** Découverte de la commune (gratuite) : présentation + petite XP la première fois. */
+export function discoverCity(save0, cityId) {
+  const save = structuredClone(save0);
+  const xp = applyEvent(save, 'discover', { cityId });
+  return { save, xp };
+}
+
+/** Mission de la commune : question sur son histoire, puis séance avec le club local. Coûte 1 déplacement. */
+export function doMission(save0, data, cityId, choice) {
+  if (save0.travelPointsLeft < 1) return { save: save0, result: { error: 'Plus de points de déplacement cette semaine.' } };
+  if (missionDone(save0, cityId)) return { save: save0, result: { error: 'Mission déjà accomplie ici.' } };
+  const save = structuredClone(save0);
+  ensureCommunity(save);
+  const city = cityById(data, cityId);
+  const m = data.territory.communes[cityId].mission;
+  save.travelPointsLeft--;
+  const success = choice === m.answer;
+  const isHome = save.community.homeCity === cityId;
+  const rep = success ? Math.round(MISSION_REP * (isHome ? 1.5 : 1)) : 3;
+  addReputation(save, cityId, rep);
+  const xp = applyEvent(save, 'mission', { cityId, success });
+  const lines = success
+    ? [`Bonne réponse ! ${m.fact}`, `Les éducateurs de ${city.name} vous ouvrent leurs portes : le recrutement est débloqué ici.`]
+    : [`Raté… La bonne réponse était : « ${m.choices[m.answer]} ». ${m.fact}`, 'Revenez une autre fois pour retenter la mission.'];
+  lines.push(`Rayonnement de l\u2019AJA à ${city.name} : ${save.cities[cityId].reputation} (+${rep}${isHome ? ', commune de cœur' : ''}).`);
+  save.log.push({ week: save.week, text: `${city.name} — mission « ${m.title} » ${success ? 'accomplie' : 'manquée'}.` });
+  return { save, result: { title: m.title, lines, success, xp } };
+}
+
+/** Mission partenaire (partenaire signé) : découvrir son activité. Coûte 1 déplacement. */
+export function partnerMission(save0, data, sponsorId) {
+  const def = data.sponsors.sponsors.find((x) => x.id === sponsorId);
+  const st = save0.sponsors[sponsorId];
+  if (!def || !st?.signed) return { save: save0, result: { error: 'Ce commerce n\u2019est pas encore partenaire.' } };
+  if (save0.travelPointsLeft < 1) return { save: save0, result: { error: 'Plus de points de déplacement cette semaine.' } };
+  if (save0.community?.partnersMet?.includes(sponsorId)) return { save: save0, result: { error: 'Partenaire déjà découvert.' } };
+  const save = structuredClone(save0);
+  save.travelPointsLeft--;
+  save.sponsors[sponsorId].satisfaction = Math.min(100, st.satisfaction + 10);
+  addReputation(save, def.city, 4);
+  const xp = applyEvent(save, 'partner', { sponsorId, xp: def.rewardInGame?.xp });
+  return { save, result: { title: def.name, lines: [def.discovery, `Satisfaction du partenaire +10.`], xp } };
+}
+
+/** Visite d'un lieu emblématique de l'AJA (à Auxerre : gratuit). */
+export function visitLandmark(save0, landmarkId) {
+  const save = structuredClone(save0);
+  const xp = applyEvent(save, 'landmark', { id: landmarkId });
+  return { save, xp };
 }

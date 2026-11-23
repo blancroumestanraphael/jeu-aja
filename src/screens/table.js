@@ -14,7 +14,7 @@ export default {
         <td class="form">${r.form.map((f) => `<i class="f-${f}">${f}</i>`).join('')}</td></tr>`;
     }).join('');
     return `
-      <a class="back" href="#/home">‹ Accueil</a>
+      ${clubNav('table')}
       <h2 class="section-title">Ligue 1 ${esc(s.season)} — classement simulé</h2>
       <div class="card scroll-x">
         <table class="tbl standings">

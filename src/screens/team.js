@@ -1,4 +1,4 @@
-import { esc, ratingBadge, toast, moraleIcon } from '../ui/components.js';
+import { esc, clubNav, ratingBadge, toast, moraleIcon } from '../ui/components.js';
 import { FORMATIONS, slotRating, autoLineup } from '../engine/lineup.js';
 import { TACTICS } from '../engine/match.js';
 import { overall, shortName, fullName, groupOf } from '../engine/players.js';
@@ -46,6 +46,7 @@ export default {
       </div>`;
 
     return `
+      ${clubNav('team')}
       <div class="card controls">
         <label>Formation
           <select data-ctl="formation">${Object.keys(FORMATIONS).map((f) => `<option ${f === A.formation ? 'selected' : ''}>${f}</option>`).join('')}</select>
