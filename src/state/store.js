@@ -9,7 +9,7 @@ const LOCAL_KEY = 'generation-aja-save';
 const LEGACY_KEYS = ['generation-aja-save-v1'];
 const BACKUP_KEY = 'generation-aja-backup';
 
-const DATA_FILES = ['players', 'clubs', 'fixtures', 'cities', 'sponsors', 'academy', 'commentary', 'territory', 'heritage'];
+const DATA_FILES = ['players', 'clubs', 'fixtures', 'cities', 'sponsors', 'academy', 'commentary', 'territory', 'heritage', 'museum'];
 
 export async function loadData() {
   const base = new URL('../data/', import.meta.url);

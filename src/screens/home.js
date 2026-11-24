@@ -5,6 +5,8 @@ import {
 } from '../engine/community.js';
 import { missionDone } from '../engine/activities.js';
 import { STAFF, staffCost } from '../engine/squad.js';
+import { openDailyPack } from '../engine/collection.js';
+import { showReward } from './heritage.js';
 import { advanceWeek, startNewSeason, fixtureOfWeek, clubById, u19OpponentOfWeek, SEASON_WEEKS } from '../engine/week.js';
 import { canPlayKeyMatch } from '../engine/keymatch.js';
 import { sortedTable } from '../engine/league.js';
@@ -119,6 +121,7 @@ export default {
     return `
       ${rendezVous}
       ${supporterStrip}
+      ${s.collection?.lastPack !== today ? `<button class="card pack-cta" data-action="pack"><span class="pk-i">🃏</span><span><b>Votre carte du jour</b><br><span class="small muted">Une carte de l’histoire de l’AJA à ajouter à votre collection</span></span><span class="chev">›</span></button>` : ''}
       ${daily}
       ${mission}
       ${nextMatch}
@@ -204,6 +207,12 @@ export default {
         store.update((s) => { s.budget -= cost; s.facilities[k] += 1; s.log.push({ week: s.week, text: `${FAC[k].label} : niveau ${s.facilities[k]}.` }); });
         toast(`${FAC[k].label} améliorés !`);
         render();
+      } else if (a === 'pack') {
+        const { save, result } = openDailyPack(store.save, data, isoDay());
+        if (!result) return;
+        store.set(save);
+        render();
+        showReward(result);
       } else if (a === 'staff') {
         const k = el.dataset.k;
         const cost = staffCost(store.save.staff[k]);

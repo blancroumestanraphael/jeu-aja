@@ -5,6 +5,8 @@ import {
 } from '../engine/activities.js';
 import { streamFor } from '../engine/rng.js';
 import { ensureCommunity } from '../engine/community.js';
+import { localMissionOf, doLocalMission } from '../engine/collection.js';
+import { cardHtml } from './heritage.js';
 
 let selectedCity = null;
 let layers = { aja: true, partners: true };
@@ -97,7 +99,14 @@ export default {
           <div class="activities">${RECRUIT_ACTIVITIES.map(activity).join('')}</div>
           ${prospects.length ? `<p class="small"><b>Jeunes repérés ici</b></p><div class="list">${prospects.map((x) => playerRow(x.p, { hidden: x.partial })).join('')}</div>` : ''}
 
-          <h4>3 · Partenaires et vie locale</h4>
+          <h4>3 · Football amateur et vie locale</h4>
+          ${done ? (() => {
+            const lm = localMissionOf(s, data, sel.id);
+            const did = s.collection?.localMissions?.[lm.key];
+            return `<div class="local-m ${did ? 'done' : ''}"><span class="act-i">${lm.icon}</span><div><b>${esc(lm.title)}</b> <span class="tag-fict">${lm.kind}</span><br><span class="small">${esc(lm.text)}</span><br>
+              ${did ? '<span class="small ok">✓ Réalisée cette semaine</span>' : `<button class="btn btn-small" data-local ${s.travelPointsLeft < 1 ? 'disabled' : ''}>Participer (1 🚗)</button>`}</div></div>`;
+          })() : '<p class="small muted">Les missions locales (football amateur, découverte, histoire) s’ouvrent après la mission de la commune.</p>'}
+          <p class="small muted">Club amateur de la commune : données à compléter avec le District de l’Yonne de football.</p>
           ${sponsorDef ? `
             <div class="partner-card">
               <div><b>${esc(sponsorDef.name)}</b> <span class="tag-fict">fictif</span><br>
@@ -153,6 +162,16 @@ export default {
       const pl = e.target.closest('[data-action="open-player"]');
       if (pl) return go('player', pl.dataset.id);
       if (e.target.closest('[data-mission]')) return missionDialog(store, data, selectedCity, render);
+      if (e.target.closest('[data-local]')) {
+        const { save, result } = doLocalMission(store.save, data, selectedCity);
+        if (result.error) return toast(result.error);
+        store.set(save);
+        render();
+        return openModal(`<div class="modal-head"><h3>${esc(result.title)}</h3><button class="icon-btn" data-close aria-label="Fermer">✕</button></div>
+          <p>${esc(result.text)}</p><p class="small ok">+${result.xp} XP · +6 de rayonnement</p>
+          ${result.card ? `${cardHtml(result.card.card)}<p class="small center ${result.card.duplicate ? 'muted' : 'ok'}">${result.card.duplicate ? `Doublon : +${result.card.xp} XP` : 'Nouvelle carte !'}</p>` : ''}
+          <button class="btn btn-primary" data-close>OK</button>`);
+      }
       const pa = e.target.closest('[data-partner]');
       if (pa) {
         const { save, result } = partnerMission(store.save, data, pa.dataset.partner);

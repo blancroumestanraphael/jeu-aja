@@ -3,6 +3,7 @@
 import { addYouth, cityById } from './setup.js';
 import { fullName } from './players.js';
 import { applyEvent, ensureCommunity, hasPerk } from './community.js';
+import { grantCard } from './collection.js';
 
 export const RECRUIT_ACTIVITIES = ['coach', 'tournoi', 'parents'];
 export const MISSION_REP = 12;
@@ -178,12 +179,14 @@ export function doMission(save0, data, cityId, choice) {
   const rep = success ? Math.round(MISSION_REP * (isHome ? 1.5 : 1)) : 3;
   addReputation(save, cityId, rep);
   const xp = applyEvent(save, 'mission', { cityId, success, answer: choice });
+  const card = success && data.museum ? grantCard(save, data, `com-${cityId}`) : null;
   const lines = success
     ? [`Bonne réponse ! ${m.fact}`, `Les éducateurs de ${city.name} vous ouvrent leurs portes : le recrutement est débloqué ici.`]
     : [`Raté… La bonne réponse était : « ${m.choices[m.answer]} ». ${m.fact}`, 'Revenez une autre fois pour retenter la mission.'];
   lines.push(`Rayonnement de l\u2019AJA à ${city.name} : ${save.cities[cityId].reputation} (+${rep}${isHome ? ', commune de cœur' : ''}).`);
   save.log.push({ week: save.week, text: `${city.name} — mission « ${m.title} » ${success ? 'accomplie' : 'manquée'}.` });
-  return { save, result: { title: m.title, lines, success, xp } };
+  if (card && !card.duplicate) lines.push(`🃏 Carte « ${card.card.title} » ajoutée à votre collection.`);
+  return { save, result: { title: m.title, lines, success, xp, card } };
 }
 
 /** Mission partenaire (partenaire signé) : découvrir son activité. Coûte 1 déplacement. */

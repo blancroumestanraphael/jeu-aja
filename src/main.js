@@ -31,7 +31,7 @@ const TABS = [
   { id: 'home', label: 'Accueil', icon: '<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/>' },
   { id: 'team', label: 'Club', icon: '<path d="M12 2 20 5v7c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V5z"/>' },
   { id: 'map', label: 'Yonne', icon: '<path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>' },
-  { id: 'heritage', label: 'Patrimoine', icon: '<path d="M12 2 2 7v2h20V7zM4 10h3v8H4zm6.5 0h3v8h-3zM17 10h3v8h-3zM2 20h20v2H2z"/>' },
+  { id: 'heritage', label: 'Musée', icon: '<path d="M12 2 2 7v2h20V7zM4 10h3v8H4zm6.5 0h3v8h-3zM17 10h3v8h-3zM2 20h20v2H2z"/>' },
   { id: 'supporter', label: 'Supporter', icon: '<path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 5.3 3 1.7-1.8 3.2-3 5.3-3 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/>' },
 ];
 

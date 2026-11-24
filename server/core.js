@@ -6,6 +6,7 @@
 
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { levelFor, dailyQuestionId, GENERATIONS } from '../src/engine/community.js';
+import { weeklyQuiz } from '../src/engine/collection.js';
 
 // --- Règles ---------------------------------------------------------------------
 export const RULES = {
@@ -168,6 +169,7 @@ export function createService(storage, { secret, adminToken, content, now = () =
       case 'weekQuiz': {
         const q = content.heritage.questions[p.qid];
         if (!q) return { reject: 'question' };
+        if (a.type === 'weekQuiz' && !weeklyQuiz({ heritage: content.heritage }, today).qids.includes(p.qid)) return { reject: 'semaine' };
         const key = `${a.type}:${p.qid}`;
         if (u.answered.includes(key)) return { reject: 'deja' };
         u.answered.push(key);

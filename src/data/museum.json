@@ -1,0 +1,44 @@
+{
+  "_note": "Musée de l'AJA (prototype) : faits publics vérifiables, sans photos ni logos. Les visuels, archives et témoignages officiels nécessitent l'autorisation du club et des ayants droit.",
+  "trophies": [
+    { "id": "d1-1996", "icon": "🏆", "title": "Champion de France", "years": "1995-1996", "text": "Le titre de champion de France, au terme de la saison du doublé." },
+    { "id": "cdf-1994", "icon": "🏆", "title": "Coupe de France", "years": "1994", "text": "Première Coupe de France, 3-0 face à Montpellier." },
+    { "id": "cdf-1996", "icon": "🏆", "title": "Coupe de France", "years": "1996", "text": "Deuxième Coupe, face à Nîmes : le doublé est réalisé." },
+    { "id": "cdf-2003", "icon": "🏆", "title": "Coupe de France", "years": "2003", "text": "Troisième Coupe, 2-1 face au Paris Saint-Germain." },
+    { "id": "cdf-2005", "icon": "🏆", "title": "Coupe de France", "years": "2005", "text": "Quatrième Coupe, 2-1 face à Sedan, pour le dernier match de Guy Roux." },
+    { "id": "l2-2024", "icon": "🥇", "title": "Champion de Ligue 2", "years": "2023-2024", "text": "Le titre de Ligue 2 et le retour immédiat dans l'élite." }
+  ],
+  "distinctions": [
+    { "icon": "⭐", "title": "32 saisons consécutives en première division", "text": "De 1980 à 2012." },
+    { "icon": "🌍", "title": "Quart de finale de Ligue des champions", "text": "En 1996-1997, éliminée par l'Ajax Amsterdam." },
+    { "icon": "🌍", "title": "Demi-finale de Coupe UEFA", "text": "En 1993, face au Borussia Dortmund." },
+    { "icon": "🎖️", "title": "Trois champions du monde 1998", "text": "Bernard Diomède, Lionel Charbonnier et Stéphane Guivarc'h jouaient à l'AJA." }
+  ],
+  "matches": [
+    { "id": "m1979", "year": 1979, "title": "Finale de la Coupe de France", "score": "Nantes 4-1 AJA (a.p.)", "text": "Pensionnaire de deuxième division, l'AJA tient tête à Nantes jusqu'aux prolongations. La France découvre le club de Guy Roux.", "quiz": "q_d2_1979" },
+    { "id": "m1993", "year": 1993, "title": "Demi-finale de Coupe UEFA", "score": "AJA – Borussia Dortmund, défaite aux tirs au but", "text": "Le dernier carré européen, perdu aux tirs au but. Une génération formée au club s'est révélée à l'Europe.", "quiz": "q_ue93" },
+    { "id": "m1994", "year": 1994, "title": "Finale de la Coupe de France", "score": "AJA 3-0 Montpellier", "text": "Le premier trophée majeur de l'histoire du club.", "quiz": "q_cdf1994" },
+    { "id": "m1996", "year": 1996, "title": "Finale de la Coupe de France", "score": "AJA 2-1 Nîmes", "text": "Face à un Nîmes de troisième division, l'AJA complète le doublé Championnat-Coupe.", "quiz": "q_nimes96" },
+    { "id": "m2003", "year": 2003, "title": "Finale de la Coupe de France", "score": "AJA 2-1 PSG", "text": "Troisième Coupe de France, arrachée face au Paris Saint-Germain.", "quiz": "q_coupes" },
+    { "id": "m2005", "year": 2005, "title": "Finale de la Coupe de France", "score": "AJA 2-1 Sedan", "text": "Quatrième Coupe et dernier match de Guy Roux sur le banc auxerrois.", "quiz": "q_2005" },
+    { "id": "m2010", "year": 2010, "title": "Ligue des champions", "score": "AJA 2-1 Ajax Amsterdam", "text": "Une victoire européenne à l'Abbé-Deschamps, dans un groupe avec le Real Madrid et l'AC Milan.", "quiz": "q_ajax2010" },
+    { "id": "m2015", "year": 2015, "title": "Finale de la Coupe de France", "score": "PSG 1-0 AJA", "text": "Pensionnaire de Ligue 2, l'AJA ne s'incline que d'un but face au PSG.", "quiz": "q_2015" },
+    { "id": "m2022", "year": 2022, "title": "Barrage d'accession", "score": "AJA – Saint-Étienne, qualification aux tirs au but", "text": "Deux matchs serrés, puis la délivrance aux tirs au but : l'AJA retrouve la Ligue 1.", "quiz": "q_barrage" }
+  ],
+  "archives": [
+    { "id": "a-patronage", "title": "Le patronage de l'abbé", "unlock": { "type": "era", "id": "racines" }, "text": "Au début du XXe siècle, les patronages catholiques proposent aux jeunes des activités sportives et culturelles. C'est dans ce cadre que l'abbé Deschamps fonde l'Association de la Jeunesse Auxerroise en 1905 : un club né pour la jeunesse, ce qui éclaire la vocation formatrice de l'AJA." },
+    { "id": "a-roux", "title": "Guy Roux, l'entraîneur d'une ville", "unlock": { "type": "era", "id": "ascension" }, "text": "Arrivé jeune sur le banc en 1961, Guy Roux construit le club pierre par pierre : recrutement local, centre de formation, gestion rigoureuse. Il devient l'un des entraîneurs les plus fidèles de l'histoire du football européen." },
+    { "id": "a-ecole", "title": "L'école auxerroise", "unlock": { "type": "cards", "n": 10 }, "text": "Le modèle auxerrois repose sur une idée simple : repérer tôt, loger, scolariser et faire jouer. Des dizaines de joueurs professionnels sont sortis du centre, dont plusieurs internationaux." },
+    { "id": "a-doublé", "title": "Le printemps 1996", "unlock": { "type": "era", "id": "grandes-annees" }, "text": "Au printemps 1996, l'AJA mène de front le championnat et la Coupe de France. Elle remporte les deux : le seul doublé de son histoire." },
+    { "id": "a-europe", "title": "Les nuits européennes", "unlock": { "type": "weekly", "n": 3 }, "text": "De la Coupe UEFA 1993 à la Ligue des champions 2010-2011, l'Abbé-Deschamps a accueilli quelques-uns des plus grands clubs d'Europe." },
+    { "id": "a-retour", "title": "Le temps du retour", "unlock": { "type": "era", "id": "retour" }, "text": "Après dix ans en Ligue 2, l'AJA retrouve l'élite en 2022, puis à nouveau en 2024 avec un titre de champion de Ligue 2. Le club renoue avec son histoire et sa formation." },
+    { "id": "a-yonne", "title": "Un club, un département", "unlock": { "type": "cards", "n": 25 }, "text": "L'AJA est l'un des rares clubs de l'élite à représenter une ville moyenne. Son public vient de tout l'Yonne : chaque commune a ses supporters, ses anciens joueurs, ses souvenirs." }
+  ],
+  "localMissions": [
+    { "id": "u11", "kind": "football", "icon": "⚽", "title": "Séance avec les U11", "text": "Les éducateurs du club de {city} vous confient un atelier de conduite de balle avec les U11." },
+    { "id": "arbitre", "kind": "football", "icon": "🟨", "title": "Arbitrer la finale du tournoi", "text": "Le tournoi des écoles de {city} cherche un arbitre pour sa finale. Le sifflet est à vous !" },
+    { "id": "benevoles", "kind": "football", "icon": "🤝", "title": "Soirée des bénévoles", "text": "Le club de {city} fête ses bénévoles, sans qui rien ne tourne. Vous venez les remercier au nom de l'AJA." },
+    { "id": "decouverte", "kind": "territoire", "icon": "🧭", "title": "Balade découverte", "text": "Une balade dans {city} avec un habitant passionné, à la découverte de son patrimoine." },
+    { "id": "expo", "kind": "histoire", "icon": "🖼️", "title": "Exposition « Le foot à {city} »", "text": "La médiathèque expose de vieilles photos d'équipes locales. Vous y reconnaissez des supporters de l'AJA de toujours." }
+  ]
+}

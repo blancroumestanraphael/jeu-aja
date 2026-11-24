@@ -570,3 +570,33 @@ td.res-D { color: var(--red); font-weight: 700; background: none; }
 .sc-end { font-size: 11px; font-weight: 800; }
 .tbl.career td, .tbl.career th { font-size: .78rem; padding: .3rem .25rem; }
 .subnav a { padding: .5rem .15rem; font-size: .76rem; }
+
+/* --- Musée, collection --- */
+.trophy-wall { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.trophy { display: flex; flex-direction: column; align-items: center; text-align: center; background: linear-gradient(180deg, #fff7df, #fff); border: 1px solid #f1d27a; border-radius: 14px; padding: 10px 6px; }
+.trophy > span { font-size: 1.8rem; }
+.trophy p { margin: 4px 0 0; }
+.dist { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.dist li { display: flex; gap: 10px; align-items: flex-start; }
+.dist li > span { font-size: 1.3rem; }
+.match-hist h3 { color: var(--blue-dark); }
+.match-hist.won { border-left: 5px solid var(--gold); }
+.archive.locked { opacity: .7; background: #f4f6fa; }
+.card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.coll-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 108px; padding: 8px 4px; border-radius: 12px; background: #fff; border: 2px solid var(--line); box-shadow: var(--shadow); text-align: center; color: inherit; cursor: pointer; font: inherit; }
+.coll-card b { font-size: .72rem; line-height: 1.15; }
+.coll-card small { font-size: .62rem; color: var(--muted); }
+.coll-card.locked { background: repeating-linear-gradient(45deg, #f1f4f9, #f1f4f9 6px, #e9eef6 6px, #e9eef6 12px); box-shadow: none; cursor: default; }
+.coll-card.locked .cc-i { color: #b9c3d3; font-weight: 900; }
+.cc-i { font-size: 1.6rem; }
+.r-rare { border-color: var(--blue-mid); }
+.r-legendaire { border-color: var(--gold); background: linear-gradient(180deg, #fff7df, #fff); }
+.big-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; padding: 18px 14px; border-radius: 18px; border: 3px solid var(--line); margin: 8px 0; animation: cardIn .45s ease; }
+.big-card .cc-i { font-size: 3rem; }
+.big-card h3 { margin: 4px 0 0; }
+@keyframes cardIn { from { transform: rotateY(90deg) scale(.8); opacity: 0; } to { transform: none; opacity: 1; } }
+.pack-cta { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; border: 2px dashed var(--gold); background: #fffdf6; font: inherit; color: inherit; cursor: pointer; }
+.pk-i { font-size: 1.8rem; }
+.local-m { display: flex; gap: 10px; padding: 10px; border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 6px; }
+.local-m.done { background: #f2fbf5; border-color: #bfe6cd; }
+.wq .choices .btn { justify-content: flex-start; text-align: left; }

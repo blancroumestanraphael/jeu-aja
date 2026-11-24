@@ -1,6 +1,9 @@
-// Patrimoine : histoire de l'AJA, grandes époques (missions historiques), moments, figures, centre de formation.
+// Musée de l'AJA : époques (missions historiques), matchs, trophées, légendes, archives, collection, quiz, formation.
 import { esc, openModal, toast, progressBar } from '../ui/components.js';
-import { ensureCommunity, answerHeritage, eraComplete, recordEvent } from '../engine/community.js';
+import { ensureCommunity, answerHeritage, eraComplete, recordEvent, isoDay } from '../engine/community.js';
+import {
+  allCards, RARITY, weeklyQuiz, answerWeekly, archiveUnlocked, unlockHint, grantEraCards, answerMatchQuiz,
+} from '../engine/collection.js';
 import { cityById } from '../engine/setup.js';
 import { overall } from '../engine/players.js';
 
@@ -61,20 +64,26 @@ export default {
         ${alumni ? `<div class="supporter-alumni">${alumni}</div>` : '<p class="small muted">Votre premier formé apparaîtra ici. Ouvrez la fiche d’un U19 et faites-le monter en équipe 1.</p>'}
       </section>`;
 
-    const views = { epoques: `<div class="eras">${eras}</div>`, moments: `<section class="card">${moments}</section>`, figures, formation };
-    const tabs = { epoques: 'Époques', moments: 'Moments', figures: 'Figures', formation: 'Formation' };
+    const views = {
+      epoques: `<div class="eras">${eras}</div><section class="card"><h3>Chronologie</h3>${moments}</section>`,
+      matchs: matchesView(s, data), trophees: trophiesView(data), figures, archives: archivesView(s, data),
+      collection: collectionView(s, data), quiz: quizView(s, data), formation,
+    };
+    const tabs = { epoques: 'Époques', matchs: 'Matchs', trophees: 'Trophées', figures: 'Légendes', archives: 'Archives', collection: 'Collection', quiz: 'Quiz', formation: 'Formation' };
+    const nCards = s.collection?.cards?.length || 0;
 
     return `
       <section class="heritage-hero">
-        <p class="eyebrow">Depuis 1905</p>
+        <p class="eyebrow">Musée de l’AJA · depuis 1905</p>
         <h2>L’histoire de l’AJA</h2>
-        <p>De l’abbé Deschamps aux nuits européennes : traversez les époques, relevez les missions historiques et débloquez la collection du club.</p>
+        <p>De l’abbé Deschamps aux nuits européennes : relevez les missions historiques, répondez au quiz de la semaine et complétez votre collection.</p>
         <div class="hh-progress"><span>${done}/${h.eras.length} époques</span>${progressBar(done, h.eras.length)}</div>
+        <div class="hh-progress"><span>${nCards}/${allCards(data).length} cartes</span>${progressBar(nCards, allCards(data).length)}</div>
       </section>
-      <div class="tabs-inline" role="tablist">${Object.entries(tabs).map(([k, l]) => `<button role="tab" class="${tab === k ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('')}</div>
+      <div class="chips" role="tablist">${Object.entries(tabs).map(([k, l]) => `<button role="tab" class="${tab === k ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('')}</div>
       ${views[tab]}
       ${c.heritage.items.length ? `<section class="card"><h3>Votre collection</h3><div class="collection">${h.eras.filter((e) => c.heritage.items.includes(e.id)).map((e) => `<span>${e.reward.icon} ${esc(e.reward.item)}</span>`).join('')}</div></section>` : ''}
-      <p class="small muted">Contenus rédigés pour le prototype à partir de faits publics, à enrichir et valider avec le club (archives, photos, témoignages).</p>`;
+      <p class="small muted">Contenus rédigés pour le prototype à partir de faits publics, sans photos ni logos : les visuels et archives officiels nécessitent l’autorisation du club et des ayants droit.</p>`;
   },
 
   bind(root, { store, data, render }) {
@@ -90,7 +99,20 @@ export default {
         return render();
       }
       const era = e.target.closest('[data-era]');
-      if (era) eraQuiz(store, data, era.dataset.era, render);
+      if (era) return eraQuiz(store, data, era.dataset.era, render);
+      const card = e.target.closest('[data-card]');
+      if (card) return showCard(data, card.dataset.card, store.save);
+      const mq = e.target.closest('[data-match]');
+      if (mq) return matchQuiz(store, data, mq.dataset.match, render);
+      const wq = e.target.closest('[data-wq]');
+      if (wq) {
+        const r = answerWeekly(store.save, data, isoDay(), wq.dataset.wq, Number(wq.dataset.a));
+        if (r.error) return toast(r.error);
+        store.set(r.save);
+        toast(r.correct ? 'Bonne réponse ! +25 XP' : 'Raté…');
+        if (r.reward) showReward(r.reward);
+        return render();
+      }
     });
   },
 };
@@ -117,20 +139,129 @@ function eraQuiz(store, data, eraId, render) {
         if (b) {
           const qid = b.dataset.q;
           const res = answerHeritage(store.save, h, eraId, qid, Number(b.dataset.a));
-          store.set(res.save);
+          store.set(res.unlocked ? grantEraCards(res.save, data, eraId).save : res.save);
           render();
           const q = h.questions[qid];
           const more = nextQ();
           el.innerHTML = `
             <div class="modal-head"><h3>${res.correct ? '✅ Exact !' : '❌ Raté'}</h3><button class="icon-btn" data-close aria-label="Fermer">✕</button></div>
             ${res.correct ? '' : `<p>La bonne réponse : <b>${esc(q.choices[q.answer])}</b>. Vous pourrez retenter la question.</p>`}
-            ${res.unlocked ? `<div class="unlock"><span>${res.unlocked.icon}</span><b>${esc(res.unlocked.item)}</b><span class="small">ajouté à votre collection · un mécène offre 1 500 € au centre · +2 de rayonnement dans toute l’Yonne</span></div>` : ''}
+            ${res.unlocked ? `<p class="small ok">🃏 Cartes de l’époque ajoutées à votre collection.</p><div class="unlock"><span>${res.unlocked.icon}</span><b>${esc(res.unlocked.item)}</b><span class="small">ajouté à votre collection · un mécène offre 1 500 € au centre · +2 de rayonnement dans toute l’Yonne</span></div>` : ''}
             <div class="choices">${more && res.correct ? '<button class="btn btn-primary" data-next>Question suivante</button>' : ''}
             ${more && !res.correct ? '<button class="btn btn-primary" data-next>Réessayer</button>' : ''}
             <button class="btn" data-close>Fermer</button></div>`;
           return;
         }
         if (e.target.closest('[data-next]')) ask(el);
+      });
+    },
+  });
+}
+
+// --- Vues du musée -------------------------------------------------------------
+function matchesView(s, data) {
+  const owned = new Set(s.collection?.cards || []);
+  return data.museum.matches.map((m) => `
+    <section class="card match-hist ${owned.has(`match-${m.id}`) ? 'won' : ''}">
+      <p class="eyebrow">${m.year} · ${esc(m.title)}</p>
+      <h3>${esc(m.score)}</h3>
+      <p class="small">${esc(m.text)}</p>
+      ${owned.has(`match-${m.id}`) ? '<p class="small ok">🃏 Carte obtenue</p>' : `<button class="btn btn-small" data-match="${m.id}">Question souvenir → carte du match</button>`}
+    </section>`).join('');
+}
+
+function trophiesView(data) {
+  const m = data.museum;
+  return `
+    <section class="card"><h3>Palmarès</h3>
+      <div class="trophy-wall">${m.trophies.map((t) => `<div class="trophy"><span>${t.icon}</span><b>${esc(t.title)}</b><small>${esc(t.years)}</small><p class="small muted">${esc(t.text)}</p></div>`).join('')}</div>
+    </section>
+    <section class="card"><h3>Distinctions</h3>
+      <ul class="dist">${m.distinctions.map((d) => `<li><span>${d.icon}</span><div><b>${esc(d.title)}</b><br><span class="small muted">${esc(d.text)}</span></div></li>`).join('')}</ul>
+    </section>`;
+}
+
+function archivesView(s, data) {
+  return data.museum.archives.map((a) => {
+    const open = archiveUnlocked(s, data, a);
+    return `<section class="card archive ${open ? '' : 'locked'}">
+      <h3>${open ? '📂' : '🔒'} ${esc(a.title)}</h3>
+      ${open ? `<p>${esc(a.text)}</p>` : `<p class="small muted">${esc(unlockHint(a))}</p>`}
+    </section>`;
+  }).join('');
+}
+
+function collectionView(s, data) {
+  const cards = allCards(data);
+  const owned = new Set(s.collection?.cards || []);
+  const types = [...new Set(cards.map((c) => c.type))];
+  return `
+    <p class="hint">Gagnez des cartes avec la carte du jour (accueil), le quiz de la semaine, les missions des communes, les époques et les matchs historiques. Un doublon rapporte de l’XP.</p>
+    ${types.map((t) => {
+      const list = cards.filter((c) => c.type === t);
+      return `<h3 class="section-title">${esc(t)}s · ${list.filter((c) => owned.has(c.id)).length}/${list.length}</h3>
+      <div class="card-grid">${list.map((c) => owned.has(c.id)
+        ? `<button class="coll-card r-${c.rarity}" data-card="${c.id}"><span class="cc-i">${c.icon}</span><b>${esc(c.title)}</b><small>${esc(RARITY[c.rarity].label)}${(s.collection.counts?.[c.id] || 1) > 1 ? ` ×${s.collection.counts[c.id]}` : ''}</small></button>`
+        : `<div class="coll-card locked"><span class="cc-i">?</span><small>${esc(RARITY[c.rarity].label)}</small></div>`).join('')}</div>`;
+    }).join('')}`;
+}
+
+function quizView(s, data) {
+  const today = isoDay();
+  const { key, qids } = weeklyQuiz(data, today);
+  const w = s.collection?.weekly?.[key] || { answers: {} };
+  const answered = Object.keys(w.answers).length;
+  const score = Object.values(w.answers).filter(Boolean).length;
+  return `
+    <section class="card">
+      <div class="card-head"><h3>Quiz de la semaine</h3><span class="chip">${key}</span></div>
+      <p class="small muted">Les mêmes 5 questions pour tous les supporters cette semaine. 3 bonnes réponses = 1 carte, 5/5 = 2 cartes.</p>
+      ${progressBar(answered, qids.length)}
+      ${answered === qids.length ? `<p class="ok"><b>Terminé : ${score}/${qids.length}</b>. Nouveau quiz lundi prochain.</p>` : ''}
+    </section>
+    ${qids.map((qid, i) => {
+      const q = data.heritage.questions[qid];
+      const a = w.answers[qid];
+      return `<section class="card wq">
+        <p class="eyebrow">Question ${i + 1}/${qids.length}</p><p><b>${esc(q.q)}</b></p>
+        ${a === undefined
+          ? `<div class="choices col">${q.choices.map((c, k) => `<button class="btn" data-wq="${qid}" data-a="${k}">${esc(c)}</button>`).join('')}</div>`
+          : `<p class="${a ? 'ok' : 'warn'}">${a ? '✅' : '❌'} ${esc(q.choices[q.answer])}</p>`}
+      </section>`;
+    }).join('')}`;
+}
+
+export function cardHtml(c) {
+  return `<div class="big-card r-${c.rarity}"><span class="cc-i">${c.icon}</span><small class="eyebrow">${esc(c.type)} · ${esc(RARITY[c.rarity].label)}</small><h3>${esc(c.title)}</h3><p class="small muted">${esc(c.sub)}</p><p class="small">${esc(c.text)}</p></div>`;
+}
+
+function showCard(data, id, s) {
+  const c = allCards(data).find((x) => x.id === id);
+  openModal(`<div class="modal-head"><h3>Carte</h3><button class="icon-btn" data-close aria-label="Fermer">✕</button></div>${cardHtml(c)}`);
+}
+
+export function showReward(reward) {
+  const list = reward.cards || [reward];
+  openModal(`<div class="modal-head"><h3>${reward.score !== undefined ? `Quiz terminé : ${reward.score}/5` : 'Nouvelle carte !'}</h3><button class="icon-btn" data-close aria-label="Fermer">✕</button></div>
+    ${list.length ? list.map((r) => `${cardHtml(r.card)}${r.duplicate ? `<p class="small muted center">Doublon : +${r.xp} XP</p>` : '<p class="small ok center">Nouvelle carte !</p>'}`).join('') : '<p>Pas de carte cette fois : 3 bonnes réponses minimum.</p>'}
+    <button class="btn btn-primary" data-close>Super</button>`);
+}
+
+function matchQuiz(store, data, matchId, render) {
+  const m = data.museum.matches.find((x) => x.id === matchId);
+  const q = data.heritage.questions[m.quiz];
+  openModal(`<div class="modal-head"><h3>${m.year} · ${esc(m.title)}</h3><button class="icon-btn" data-close aria-label="Fermer">✕</button></div>
+    <p><b>${esc(q.q)}</b></p><div class="choices col">${q.choices.map((c, k) => `<button class="btn" data-mqa="${k}">${esc(c)}</button>`).join('')}</div>`, {
+    onBind(el) {
+      el.addEventListener('click', (e) => {
+        const b = e.target.closest('[data-mqa]');
+        if (!b) return;
+        const r = answerMatchQuiz(store.save, data, matchId, Number(b.dataset.mqa));
+        store.set(r.save);
+        render();
+        el.innerHTML = r.correct
+          ? `<div class="modal-head"><h3>✅ Exact !</h3></div>${cardHtml(r.card.card)}<button class="btn btn-primary" data-close>Ajouter à ma collection</button>`
+          : `<div class="modal-head"><h3>❌ Raté</h3></div><p>Réponse : <b>${esc(q.choices[q.answer])}</b>. Retentez plus tard.</p><button class="btn" data-close>Fermer</button>`;
       });
     },
   });
