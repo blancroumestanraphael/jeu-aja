@@ -72,10 +72,23 @@ function addXp(c, n) {
   return n;
 }
 
+// --- File d'actions vers le serveur communautaire ------------------------------
+// Le client n'envoie pas de points : il envoie des actions que le serveur vérifie (voir server/core.js).
+export const MAX_PENDING = 500;
+export function queueAction(draft, type, payload = {}) {
+  draft.sync ||= { pending: [], lastSync: null };
+  draft.sync.seq = (draft.sync.seq || 0) + 1;
+  draft.sync.pending.push({ type, payload, clientId: `${draft.seed}-${draft.season}-${draft.sync.seq}`, at: new Date().toISOString() });
+  if (draft.sync.pending.length > MAX_PENDING) draft.sync.pending = draft.sync.pending.slice(-MAX_PENDING);
+}
+const SERVER_ACTION = { activity: 'activity', recruit: 'recruit', keyMatch: 'keyMatch', alumniEstablished: 'alumni' };
+
 /** Enregistre une action sur un brouillon (déjà cloné). Renvoie l'XP gagnée. */
 export function applyEvent(draft, type, payload = {}, yonneCityIds = null) {
   ensureCommunity(draft);
   const c = draft.community;
+  if (SERVER_ACTION[type]) queueAction(draft, SERVER_ACTION[type], payload.cityId ? { cityId: payload.cityId } : {});
+  if (type === 'mission') queueAction(draft, 'mission', { cityId: payload.cityId, answer: payload.answer });
   const markVisit = (cityId) => {
     if (cityId && !c.visitedCities.includes(cityId)) {
       c.visitedCities.push(cityId);
@@ -160,6 +173,7 @@ export function touchDay(save, today) {
   const c = draft.community;
   c.firstSeen ||= today;
   if (!c.activeDays.includes(today)) {
+    queueAction(draft, 'visit', { date: today });
     c.activeDays.push(today);
     c.activeDays = c.activeDays.slice(-400);
     addXp(c, XP.dayVisit);
@@ -198,6 +212,7 @@ export function answerDaily(save, heritage, today, choice) {
   const q = heritage.questions[dailyQuestionId(heritage, today)];
   const correct = choice === q.answer;
   c.daily = { date: today, answered: true, correct };
+  queueAction(draft, 'daily', { date: today, answer: choice });
   c.stats.quizAnswered++;
   if (correct) c.stats.quizCorrect++;
   c.weekly.heritage++;
@@ -221,6 +236,7 @@ export function answerHeritage(save, heritage, eraId, qid, choice) {
   const before = c.heritage.answered[qid];
   if (before === true) return { save, correct, already: true };
   c.heritage.answered[qid] = correct;
+  if (before === undefined) queueAction(draft, 'quiz', { qid, answer: choice });
   c.stats.quizAnswered++;
   c.weekly.heritage++;
   let unlocked = null;

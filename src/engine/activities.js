@@ -177,7 +177,7 @@ export function doMission(save0, data, cityId, choice) {
   const isHome = save.community.homeCity === cityId;
   const rep = success ? Math.round(MISSION_REP * (isHome ? 1.5 : 1)) : 3;
   addReputation(save, cityId, rep);
-  const xp = applyEvent(save, 'mission', { cityId, success });
+  const xp = applyEvent(save, 'mission', { cityId, success, answer: choice });
   const lines = success
     ? [`Bonne réponse ! ${m.fact}`, `Les éducateurs de ${city.name} vous ouvrent leurs portes : le recrutement est débloqué ici.`]
     : [`Raté… La bonne réponse était : « ${m.choices[m.answer]} ». ${m.fact}`, 'Revenez une autre fois pour retenter la mission.'];

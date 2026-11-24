@@ -2,6 +2,10 @@
   publish = "."
   command = ""
 
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["src/data/**", "server/content/**"]
+
 [[headers]]
   for = "/sw.js"
   [headers.values]

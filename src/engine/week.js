@@ -9,7 +9,7 @@ import { progressPlayer, ageDecline } from './progression.js';
 import { checkCoachMessages, resolveRivalRisk, surpriseEvent, removeFromTeams } from './events.js';
 import { decayReputation } from './activities.js';
 import { addYouth } from './setup.js';
-import { applyEvent, ensureCommunity, hasPerk, mobilisationActive } from './community.js';
+import { applyEvent, ensureCommunity, hasPerk, mobilisationActive, queueAction } from './community.js';
 import { ensureContracts, checkPromises, expiringContracts, seasonEndYear, MIN_WAGE, wageDemand } from './contracts.js';
 import { fromRealPlayer } from './players.js';
 
@@ -116,6 +116,7 @@ export function advanceWeek(save0, data) {
   const oppGoals = fixture.home ? l1.awayGoals : l1.homeGoals;
   const l1Outcome = ajaGoals > oppGoals ? 'V' : ajaGoals < oppGoals ? 'D' : 'N';
   save.results.push({ week, comp: 'L1', home: home.name, away: away.name, hg: l1.homeGoals, ag: l1.awayGoals, outcome: l1Outcome });
+  queueAction(save, 'match', { seed: save.seed, season: save.season, week, goalsFor: ajaGoals, goalsAgainst: oppGoals });
   report.l1 = { home: home.name, away: away.name, hg: l1.homeGoals, ag: l1.awayGoals, events: l1.events, outcome: l1Outcome, fromKeyMatch: !!l1.fromKeyMatch };
 
   // --- U19

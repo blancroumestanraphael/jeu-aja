@@ -1,0 +1,60 @@
+{
+  "_note": "Défis collectifs et événements limités dans le temps. Modifiables depuis le tableau de bord admin (admin.html). Les objectifs sont à ajuster selon le nombre réel de joueurs.",
+  "events": [
+    {
+      "id": "yonne-10000",
+      "title": "Défi de l'Yonne : 10 000 actions",
+      "text": "Les supporters de l'Yonne réalisent ensemble 10 000 actions (missions, recrutements, quiz, matchs). À la clé : un match de gala virtuel à l'Abbé-Deschamps pour toute la communauté.",
+      "scope": "yonne",
+      "metric": "actions",
+      "target": 10000,
+      "start": "2026-11-01",
+      "end": "2027-06-30",
+      "reward": { "badge": "Bâtisseur de l'Yonne", "icon": "🏗️", "unlock": "Match de gala virtuel" }
+    },
+    {
+      "id": "objectif-om",
+      "title": "Objectif OM : 300 victoires",
+      "text": "Avant AJA – OM du 29 novembre, gagnez ensemble 300 matchs dans vos parties.",
+      "scope": "global",
+      "metric": "wins",
+      "target": 300,
+      "start": "2026-11-23",
+      "end": "2026-11-29",
+      "reward": { "badge": "Mobilisé contre l'OM", "icon": "📣" }
+    },
+    {
+      "id": "semaine-patrimoine",
+      "title": "Semaine du patrimoine",
+      "text": "2 000 bonnes réponses aux questions sur l'histoire de l'AJA en une semaine.",
+      "scope": "global",
+      "metric": "quiz",
+      "target": 2000,
+      "start": "2026-11-30",
+      "end": "2026-12-06",
+      "reward": { "badge": "Gardien de la mémoire", "icon": "📜" }
+    },
+    {
+      "id": "mille-buts",
+      "title": "Mille buts pour l'AJA",
+      "text": "Marquez ensemble 1 000 buts avec l'équipe 1 pendant les fêtes.",
+      "scope": "global",
+      "metric": "goals",
+      "target": 1000,
+      "start": "2026-12-14",
+      "end": "2027-01-04",
+      "reward": { "badge": "Buteur de Noël", "icon": "🎄" }
+    },
+    {
+      "id": "coupe-communes",
+      "title": "Coupe des communes",
+      "text": "Compétition entre les communes de l'Yonne : chaque mission accomplie rapporte un point à votre commune de cœur.",
+      "scope": "commune",
+      "metric": "missions",
+      "target": 500,
+      "start": "2027-01-05",
+      "end": "2027-02-28",
+      "reward": { "badge": "Vainqueur de la Coupe des communes", "icon": "🏆" }
+    }
+  ]
+}

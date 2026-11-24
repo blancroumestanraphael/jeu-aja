@@ -1,5 +1,6 @@
 // Espace supporter : profil, ancienneté, progression (avec effets en jeu), statistiques, défis, succès.
 import { esc, toast, progressBar } from '../ui/components.js';
+import { supporterNav } from './community.js';
 import {
   ensureCommunity, levelFor, xpForLevel, PERKS, GENERATIONS, generationOf, WEEKLY_CHALLENGES, challengeKey, claimChallenge,
   collectiveChallenges, achievements, currentStreak, seniorityDays, isoDay,
@@ -32,6 +33,7 @@ export default {
     ];
 
     return `
+      ${supporterNav('supporter')}
       <section class="supporter-hero">
         <p class="eyebrow">Espace supporter · saison ${esc(s.season)}</p>
         <h2>${esc(c.displayName)}</h2>
@@ -99,7 +101,7 @@ export default {
             ${progressBar(x.value, x.target)}
             <p class="small">🎁 ${esc(x.reward)}</p>
           </div>`).join('')}</div>
-        <p class="small muted">Dans ce prototype, les défis comptent votre progression. La version connectée additionnera les supporters de toute l’Yonne (classement par commune, défis entre générations), ce qui nécessite un serveur.</p>
+        <p class="small muted">Défis de votre partie. Les défis partagés par tous les supporters (Yonne, communes, événements) sont dans l’onglet <a href="#/community">Communauté</a>.</p>
       </section>
 
       <section class="card">
@@ -111,10 +113,10 @@ export default {
       <section class="card">
         <h3>Les générations de supporters</h3>
         <ul class="gens">${GENERATIONS.map((g) => `<li class="${gen?.id === g.id ? 'me' : ''}"><b>${esc(g.label)}</b><span class="small muted">${g.from ? `${g.from} – ${g.to < 9999 ? g.to : 'aujourd’hui'}` : `jusqu’en ${g.to}`}</span></li>`).join('')}</ul>
-        <p class="small muted">Prochaine étape (version connectée) : des défis entre générations de supporters.</p>
+        <p class="small muted">Le défi entre générations se joue dans <a href="#/community">Communauté → Classements → Générations</a>.</p>
       </section>
 
-      <p class="small muted supporter-disclaimer">Génération AJA est un prototype indépendant et non officiel. Votre progression est enregistrée dans votre sauvegarde (locale ou cloud personnelle) ; elle n’est pas encore partagée avec d’autres supporters.</p>`;
+      <p class="small muted supporter-disclaimer">Génération AJA est un prototype indépendant et non officiel. Votre espace personnel est enregistré dans votre sauvegarde ; vos actions sont envoyées au serveur communautaire (classements, défis) quand vous avez créé votre profil.</p>`;
   },
 
   bind(root, { store, render }) {
