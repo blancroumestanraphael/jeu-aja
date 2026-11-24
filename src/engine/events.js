@@ -202,4 +202,7 @@ export const CHOICE_LABELS = {
   calm: 'Opération visibilité (−1 000 €)',
   ignore: 'Ignorer',
   ok: 'Compris',
+  sell: 'Vendre',
+  counterOffer: 'Demander +15 %',
+  refuseOffer: 'Refuser',
 };

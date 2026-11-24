@@ -26,7 +26,8 @@ export function teamStrength(team) {
   const tactic = TACTICS[team.tactic] || TACTICS.equilibre;
   // Moral : effet modéré (0,92 à 1,08) pour éviter les spirales de défaites
   const moraleFactor = 0.92 + 0.16 * ((team.morale ?? 70) / 100);
-  return team.rating * tactic.strength * moraleFactor * (team.isHome ? HOME_BONUS : 1);
+  // factor : plan de jeu face à l'adversaire × cohésion du groupe (équipe 1)
+  return team.rating * tactic.strength * moraleFactor * (team.isHome ? HOME_BONUS : 1) * (team.factor ?? 1);
 }
 
 export function newMatchState() {
@@ -87,7 +88,7 @@ export function playSlices(state, home, away, rng, toSlice, { mods = {}, templat
       }
       if (rng.chance(CARD_P)) {
         const p = pickPlayer(rng, side.team.players, WEIGHTS_CARD);
-        say('card', s.slice * 5 + rng.int(1, 5), side.key, { team: side.team.name, player: p?.name || side.team.short || side.team.name, playerId: p?.id });
+        say(rng.chance(0.07) && (!tpl || tpl.red) ? 'red' : 'card', s.slice * 5 + rng.int(1, 5), side.key, { team: side.team.name, player: p?.name || side.team.short || side.team.name, playerId: p?.id });
       }
     }
     if (s.slice === 8 && tpl) say('halftime', 45, null, {});

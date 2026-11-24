@@ -29,5 +29,9 @@
   ],
   "fulltime": [
     "Coup de sifflet final ! {score}"
+  ],
+  "red": [
+    "Carton rouge ! {player} ({team}) est expulsé.",
+    "L'arbitre n'hésite pas : rouge direct pour {player} !"
   ]
 }

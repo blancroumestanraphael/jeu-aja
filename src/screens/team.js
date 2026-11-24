@@ -1,4 +1,6 @@
-import { esc, clubNav, ratingBadge, toast, moraleIcon } from '../ui/components.js';
+import { esc, clubNav, ratingBadge, toast, moraleIcon, availabilityBadge, progressBar } from '../ui/components.js';
+import { PLANS, planFactor, styleKnown, avgRating, isAvailable } from '../engine/squad.js';
+import { fixtureOfWeek, clubById } from '../engine/week.js';
 import { FORMATIONS, slotRating, autoLineup } from '../engine/lineup.js';
 import { TACTICS } from '../engine/match.js';
 import { overall, shortName, fullName, groupOf } from '../engine/players.js';
@@ -10,7 +12,7 @@ const GROUP_ORDER = { GK: 0, DEF: 1, MIL: 2, ATT: 3 };
 
 export default {
   keepScroll: true,
-  render({ store }) {
+  render({ store, data }) {
     const s = store.save;
     ensureFirstTeamLineup(s);
     const A = s.teams.A;
@@ -28,7 +30,7 @@ export default {
       const off = p.position !== slots[i].pos;
       return `<button class="tok ${isSel('starter', i) ? 'sel' : ''} ${!p.isReal ? 'youth' : ''}" style="left:${slots[i].x}%;top:${slots[i].y}%"
           data-kind="starter" data-idx="${i}" data-id="${p.id}" aria-label="${esc(fullName(p))}, ${slots[i].pos}, note ${r}">
-          <span class="tok-r ${off ? 'off' : ''}">${r}</span>
+          <span class="tok-r ${off ? 'off' : ''} ${isAvailable(p) ? '' : 'unav'}">${isAvailable(p) ? r : (p.injury ? '🚑' : '🟥')}</span>
           <span class="tok-n">${esc(p.lastName)}</span>
           <span class="tok-p">${slots[i].pos}</span>
         </button>`;
@@ -39,7 +41,7 @@ export default {
         <button class="sq-main" data-kind="${kind}" data-idx="${idx}" data-id="${p.id}">
           <span class="pos pos-${slotPos || p.position}">${slotPos || p.position}</span>
           <span class="pr-main"><span class="pr-name">${esc(fullName(p))}${slotPos && slotPos !== p.position ? ` <span class="small muted">(${p.position})</span>` : ''}${p.isReal || p.freeAgent ? '' : ' <span class="tag">Formé</span>'}</span>
-          <span class="pr-sub">${p.age} ans · ${moraleIcon(p.morale)} · ${p.ovrSource === 'ea-fc27' ? 'EA FC 27' : p.isReal ? 'note estimée' : 'centre de formation'}</span></span>
+          <span class="pr-sub">${availabilityBadge(p)} ${p.age} ans · ${moraleIcon(p.morale)}${avgRating(p) ? ` · ⌀ ${avgRating(p)}/10 (${p.matchStats.apps} m.)` : ` · ${p.ovrSource === 'ea-fc27' ? 'EA FC 27' : p.isReal ? 'note estimée' : 'centre de formation'}`}</span></span>
           ${ratingBadge(overall(p))}
         </button>
         <a class="icon-btn" href="#/player/${p.id}" aria-label="Fiche de ${esc(fullName(p))}">›</a>
@@ -56,6 +58,7 @@ export default {
         </label>
         <button class="btn btn-small" data-ctl="auto">Auto</button>
       </div>
+      ${planCard(s, data)}
       <p class="hint">${selected ? `<b>${esc(shortName(P(selected.id)))}</b> sélectionné : touchez un autre joueur pour échanger. <a href="#/player/${selected.id}">Voir sa fiche ›</a>` : 'Touchez deux joueurs pour les échanger, ou › pour ouvrir une fiche. Note moyenne du XI : <b>' + avg.toFixed(1) + '</b>'}</p>
       <div class="pitch" role="group" aria-label="Composition sur le terrain">
         <div class="pitch-lines"></div>
@@ -78,6 +81,12 @@ export default {
 
   bind(root, { store, render }) {
     const onClick = (e) => {
+      const pl = e.target.closest('[data-ctl="plan"]');
+      if (pl) {
+        store.update((s) => { s.teams.A.plan = pl.value; });
+        toast(`Plan de jeu : ${PLANS[pl.value].label}`);
+        return render();
+      }
       const ctl = e.target.closest('[data-ctl="auto"]');
       if (ctl) {
         store.update((s) => {
@@ -145,4 +154,26 @@ function swap(A, a, b) {
   ops.sort((x, y) => (x[0].kind === 'bench') - (y[0].kind === 'bench'));
   for (const [slot, id] of ops) set(slot, id ?? null);
   A.bench = A.bench.filter(Boolean);
+}
+
+function planCard(s, data) {
+  const f = fixtureOfWeek(data, s.week);
+  if (!f || s.seasonOver) return '';
+  const club = clubById(data, f.opponent);
+  const known = styleKnown(s);
+  const A = s.teams.A;
+  const pf = known ? planFactor(A.plan, club.style, s.staff?.analyste) : 1;
+  const verdict = !known ? 'Style adverse inconnu : recrutez un analyste vidéo (niveau 2) pour le connaître.'
+    : pf > 1 ? `✅ Votre plan contre ce style : +${Math.round((pf - 1) * 100)} % de force.`
+    : pf < 1 ? `⚠️ Mauvais choix contre ce style : ${Math.round((pf - 1) * 100)} % de force.` : 'Plan neutre contre ce style.';
+  return `
+    <section class="card plan">
+      <div class="card-head"><h3>Plan de jeu · J${s.week}</h3><span class="chip">${esc(club.short)}</span></div>
+      <p class="small">Adversaire : <b>${esc(club.name)}</b>${known ? ` · style <b>${PLANS[club.style].label.toLowerCase()}</b>` : ''}</p>
+      <div class="seg wide">${Object.entries(PLANS).map(([k, p]) => `<button class="${A.plan === k ? 'on' : ''}" data-ctl="plan" value="${k}">${p.label}</button>`).join('')}</div>
+      <p class="small ${pf < 1 ? 'warn' : pf > 1 ? 'ok' : 'muted'}">${verdict}</p>
+      <p class="small muted">Pressing bat possession, possession bat contre, contre bat pressing.</p>
+      <div class="coh"><span class="small">Cohésion du groupe : <b>${Math.round(s.cohesion ?? 60)}</b>/100</span>${progressBar(s.cohesion ?? 60, 100)}
+      <span class="small muted">Un XI stable soude le vestiaire (jusqu’à +5 % de force) ; les remaniements et les recrues la font baisser.</span></div>
+    </section>`;
 }

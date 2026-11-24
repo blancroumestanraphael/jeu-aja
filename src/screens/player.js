@@ -2,12 +2,17 @@ import { esc, attrGauges, stars, ratingBadge, moraleIcon, evolutionChart, toast,
 import { projectPlayer, currentPlayingTime } from '../engine/projection.js';
 import { marketValue, yearsLeft, canNegotiate, ROLES } from '../engine/contracts.js';
 import { openNegotiation } from '../ui/negotiation.js';
+import { scenarioChart, availabilityBadge } from '../ui/components.js';
+import { careerScenarios } from '../engine/projection.js';
+import { avgRating, unavailableReason } from '../engine/squad.js';
+import { canLoan, loanOut } from '../engine/mercato.js';
+import { streamFor } from '../engine/rng.js';
 import { overall, fullName, ATTRS, ATTR_LABELS } from '../engine/players.js';
 import { promoteToFirstTeam } from '../engine/week.js';
 import { movePlayer } from '../engine/events.js';
 import { cityById } from '../engine/setup.js';
 
-const TEAM_LABEL = { A: 'Équipe 1', U19: 'U19', U17: 'U17 (simulé)', U15: 'U15 (simulé)', PROSPECT: 'Repéré (hors club)', PARTI: 'A quitté le club' };
+const TEAM_LABEL = { A: 'Équipe 1', U19: 'U19', U17: 'U17 (simulé)', U15: 'U15 (simulé)', PROSPECT: 'Repéré (hors club)', PARTI: 'A quitté le club', LOAN: 'Prêté à un autre club' };
 
 export default {
   render({ store, data, param }) {
@@ -59,6 +64,7 @@ export default {
         </div>
       </section>` : ''}
 
+      ${hidden ? '' : careerCard(s, p, ovr)}
       ${p.contract && ['A', 'U19', 'U17', 'U15'].includes(p.team) ? contractCard(s, p, ovr, hidden) : ''}
 
       <section class="actions">
@@ -72,6 +78,16 @@ export default {
   bind(root, { store, render, param }) {
     root.addEventListener('click', (e) => {
       if (e.target.closest('[data-negotiate]')) return openNegotiation(store, param, render);
+      if (e.target.closest('[data-list]')) {
+        store.update((s) => { s.players[param].transferListed = !s.players[param].transferListed; });
+        toast(store.save.players[param].transferListed ? 'Placé sur la liste des transferts : plus d’offres au mercato' : 'Retiré de la liste des transferts');
+        return render();
+      }
+      if (e.target.closest('[data-loan]')) {
+        const r = loanOut(store.save, param, streamFor(store.save, 'loan', param));
+        if (r.result.error) return toast(r.result.error);
+        store.set(r.save); toast(`Prêté à ${r.result.club}`); return render();
+      }
       const f = e.target.closest('[data-focus]');
       if (f) {
         store.update((s) => { s.players[param].trainingFocus = f.dataset.focus; });
@@ -147,7 +163,42 @@ function contractCard(s, p, ovr, hidden) {
       <p class="small muted">Valeur estimée par le jeu (note, âge, potentiel, durée de contrat)${c.source === 'estime' ? ' · fin de contrat estimée' : ''}.</p>
       ${hidden ? '' : evolutionChart({ real, proj, unit: ' M€', realCaption: 'Saison en cours', projCaption: 'Projection 4 ans' })}
       <div class="contract-actions">
+        ${c.type === 'pro' && p.team === 'A' ? `<button class="btn ${p.transferListed ? 'btn-gold' : ''}" data-list>${p.transferListed ? 'Retirer de la liste' : 'Mettre sur la liste'}</button>` : ''}
         ${can.ok ? `<button class="btn btn-primary" data-negotiate>✍️ ${c.type === 'formation' ? 'Proposer un contrat pro' : 'Prolonger / négocier'}</button>` : `<p class="small muted">${esc(can.reason)}</p>`}
       </div>
+    </section>`;
+}
+
+const TEAM_SHORT = { A: 'Équipe 1', U19: 'U19', U17: 'U17', U15: 'U15', LOAN: 'Prêt' };
+
+function careerCard(s, p, ovr) {
+  const sc = careerScenarios(s, p);
+  const current = { titulaire: 'titulaire', remplacant: 'remplacant', aucun: 'sansJouer' }[currentPlayingTime(s, p)];
+  const chosen = p.team === 'LOAN' ? 'pret' : current;
+  const a = p.attributes;
+  const exact = (a.technique + a.physique + a.mental + a.vision) / 4;
+  const ms = p.matchStats || { apps: 0, goals: 0 };
+  const loan = (s.loans || []).find((l) => l.playerId === p.id);
+  const reason = unavailableReason(p);
+  const lc = canLoan(s, p);
+  const log = p.careerLog || [];
+  return `
+    <section class="card">
+      <div class="card-head"><h3>Trajectoire de carrière</h3>${availabilityBadge(p)}</div>
+      ${reason ? `<p class="small warn">Indisponible : ${esc(reason)}.</p>` : ''}
+      ${loan ? `<p class="small">🔁 Prêté à ${esc(loan.club)} jusqu’à la fin de la saison.</p>` : ''}
+      <div class="stat-grid">
+        <div><span>🏟️</span><b>${ms.apps}</b><small>matchs (saison)</small></div>
+        <div><span>⚽</span><b>${ms.goals}</b><small>buts</small></div>
+        <div><span>📝</span><b>${avgRating(p) ?? '–'}</b><small>note moyenne /10</small></div>
+      </div>
+      <h4>Scénarios sur 4 saisons</h4>
+      ${scenarioChart({ current: exact, scenarios: sc, potential: p.potential, chosen })}
+      <p class="small muted">Vos décisions changent sa trajectoire : temps de jeu, prêt, axe d’entraînement, staff (entraîneur adjoint niv. ${s.staff?.adjoint || 1}) et terrains (niv. ${s.facilities.terrains}).</p>
+      ${lc.ok ? '<button class="btn btn-small" data-loan>🔁 Prêter jusqu’à la fin de saison</button>' : ''}
+      ${log.length ? `<h4>Historique</h4>
+      <div class="scroll-x"><table class="tbl career"><thead><tr><th>Saison</th><th>Équipe</th><th>Âge</th><th>Note</th><th>M.</th><th>Buts</th><th>⌀</th><th>Valeur</th></tr></thead><tbody>
+        ${log.map((l) => `<tr><td>${esc(l.season)}</td><td>${TEAM_SHORT[l.team] || esc(l.team)}</td><td>${l.age}</td><td>${l.ovr}</td><td>${l.apps}</td><td>${l.goals}</td><td>${l.avg ?? '–'}</td><td>${l.value.toFixed(1)} M€</td></tr>`).join('')}
+      </tbody></table></div>` : ''}
     </section>`;
 }

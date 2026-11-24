@@ -16,6 +16,7 @@ import supporter from './screens/supporter.js';
 import heritage from './screens/heritage.js';
 import contracts from './screens/contracts.js';
 import community from './screens/community.js';
+import mercato from './screens/mercato.js';
 import profile from './screens/profile.js';
 import { touchDay, isoDay } from './engine/community.js';
 import { initErrorTracking } from './state/telemetry.js';
@@ -24,7 +25,7 @@ import { SAVE_VERSION } from './engine/migrations.js';
 
 initErrorTracking(`save-v${SAVE_VERSION}`);
 
-const SCREENS = { home, team, u19, player, map, messages, match, table, gold, supporter, heritage, contracts, community, profile, welcome };
+const SCREENS = { home, team, u19, player, map, messages, match, table, gold, supporter, heritage, contracts, community, profile, mercato, welcome };
 // 5 onglets orientés supporter ; les messages passent dans l'en-tête.
 const TABS = [
   { id: 'home', label: 'Accueil', icon: '<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/>' },
@@ -79,7 +80,7 @@ function tabbar(active) {
     </nav>`;
 }
 
-const TAB_OF = { player: null, match: null, messages: null, table: 'team', u19: 'team', contracts: 'team', community: 'supporter', profile: 'supporter', gold: 'heritage' };
+const TAB_OF = { player: null, match: null, messages: null, table: 'team', u19: 'team', contracts: 'team', mercato: 'team', community: 'supporter', profile: 'supporter', gold: 'heritage' };
 
 let currentCleanup = null;
 

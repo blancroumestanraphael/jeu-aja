@@ -6,7 +6,7 @@ import { advanceWeek } from '../engine/week.js';
 const MS_PER_MIN = 90;
 let km = null;
 
-const ICON = { goal: '⚽', chance: '•', card: '🟨', kickoff: '🏁', halftime: '⏸', fulltime: '🏁' };
+const ICON = { goal: '⚽', chance: '•', card: '🟨', red: '🟥', kickoff: '🏁', halftime: '⏸', fulltime: '🏁' };
 
 function scoreboard(home, away) {
   return `

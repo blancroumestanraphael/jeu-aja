@@ -4,6 +4,7 @@ import {
   challengeKey, mobilisationActive, MOBILISATION_XP,
 } from '../engine/community.js';
 import { missionDone } from '../engine/activities.js';
+import { STAFF, staffCost } from '../engine/squad.js';
 import { advanceWeek, startNewSeason, fixtureOfWeek, clubById, u19OpponentOfWeek, SEASON_WEEKS } from '../engine/week.js';
 import { canPlayKeyMatch } from '../engine/keymatch.js';
 import { sortedTable } from '../engine/league.js';
@@ -148,6 +149,13 @@ export default {
             <button class="btn btn-small" data-action="upgrade" data-k="${k}" ${s.budget < facilityCost(s.facilities[k]) || s.facilities[k] >= 5 ? 'disabled' : ''}>
               ${s.facilities[k] >= 5 ? 'Max' : euro(facilityCost(s.facilities[k]))}</button>
           </div>`).join('')}
+        <h4>Staff technique</h4>
+        ${Object.entries(STAFF).map(([k, v]) => `
+          <div class="fac">
+            <div><b>${v.label}</b> <span class="lvl">niv. ${s.staff[k]}</span><br><span class="small muted">${v.effect}</span></div>
+            <button class="btn btn-small" data-action="staff" data-k="${k}" ${s.budget < staffCost(s.staff[k]) || s.staff[k] >= 5 ? 'disabled' : ''}>
+              ${s.staff[k] >= 5 ? 'Max' : euro(staffCost(s.staff[k]))}</button>
+          </div>`).join('')}
       </section>
 
       <section class="card">
@@ -195,6 +203,13 @@ export default {
         if (store.save.budget < cost) return;
         store.update((s) => { s.budget -= cost; s.facilities[k] += 1; s.log.push({ week: s.week, text: `${FAC[k].label} : niveau ${s.facilities[k]}.` }); });
         toast(`${FAC[k].label} améliorés !`);
+        render();
+      } else if (a === 'staff') {
+        const k = el.dataset.k;
+        const cost = staffCost(store.save.staff[k]);
+        if (store.save.budget < cost) return;
+        store.update((s) => { s.budget -= cost; s.staff[k] += 1; s.log.push({ week: s.week, text: `${STAFF[k].label} : niveau ${s.staff[k]}.` }); });
+        toast(`${STAFF[k].label} : niveau ${store.save.staff[k]}`);
         render();
       } else if (a === 'calendar') {
         showCalendar(store, data);

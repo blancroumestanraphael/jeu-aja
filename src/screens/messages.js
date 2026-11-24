@@ -1,9 +1,10 @@
 import { esc, toast } from '../ui/components.js';
 import { answerMessage, CHOICE_LABELS } from '../engine/events.js';
+import { answerOffer } from '../engine/mercato.js';
 import { streamFor } from '../engine/rng.js';
 
-const STATUS = { accepted: '✅ Monté', refused: '❌ Refusé', lost: '💔 Perdu', done: '✔ Traité' };
-const KIND_ICON = { coach: '🧢', rival: '⚠️', sponsor: '💼', info: '🔎' };
+const STATUS = { accepted: '✅ Monté', refused: '❌ Refusé', lost: '💔 Perdu', done: '✔ Traité', expired: '⌛ Expirée' };
+const KIND_ICON = { coach: '🧢', rival: '⚠️', sponsor: '💼', info: '🔎', offer: '💶' };
 
 export default {
   render({ store }) {
@@ -34,7 +35,8 @@ export default {
       const b = e.target.closest('[data-msg]');
       if (!b) return;
       const s = store.save;
-      const next = answerMessage(s, b.dataset.msg, b.dataset.choice, streamFor(s, 'answer', b.dataset.msg));
+      const kind = s.messages.find((x) => x.id === b.dataset.msg)?.kind;
+      const next = (kind === 'offer' ? answerOffer : answerMessage)(s, b.dataset.msg, b.dataset.choice, streamFor(s, 'answer', b.dataset.msg));
       store.set(next);
       const m = next.messages.find((x) => x.id === b.dataset.msg);
       toast(m.status === 'pending' ? 'On attend encore un peu…' : STATUS[m.status] || 'OK');

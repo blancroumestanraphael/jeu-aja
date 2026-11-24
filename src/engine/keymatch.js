@@ -4,6 +4,7 @@ import { createRng, hashSeed } from './rng.js';
 import { clubTeam, newMatchState, playSlices, INSTRUCTIONS, SLICES } from './match.js';
 import { firstTeamMatchTeam, clubById, fixtureOfWeek, supporterMoraleBonus } from './week.js';
 import { applyEvent } from './community.js';
+import { ensureAvailableLineup, planFactor, cohesionFactor } from './squad.js';
 
 export const KEY_MOMENTS = [3, 9, 14]; // tranches (≈ 15e, 45e, 70e minute)
 
@@ -27,7 +28,10 @@ export function canPlayKeyMatch(save, data, now = new Date()) {
 export function createKeyMatch(save, data) {
   const f = fixtureOfWeek(data, save.week);
   const club = clubById(data, f.opponent);
-  const aja = firstTeamMatchTeam(structuredClone(save), data, f.home, supporterMoraleBonus(save, data, f));
+  const draft = structuredClone(save);
+  ensureAvailableLineup(draft);
+  const aja = firstTeamMatchTeam(draft, data, f.home, supporterMoraleBonus(save, data, f));
+  aja.factor = planFactor(draft.teams.A.plan, club.style, save.staff?.analyste) * cohesionFactor(save.cohesion);
   const opp = clubTeam(club, { isHome: !f.home });
   return {
     fixture: f,

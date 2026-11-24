@@ -12,6 +12,13 @@ import { addYouth } from './setup.js';
 import { applyEvent, ensureCommunity, hasPerk, mobilisationActive, queueAction } from './community.js';
 import { ensureContracts, checkPromises, expiringContracts, seasonEndYear, MIN_WAGE, wageDemand } from './contracts.js';
 import { fromRealPlayer } from './players.js';
+import {
+  ensureAvailableLineup, planFactor, cohesionFactor, updateCohesion, applyMatchConsequences, tickAvailability,
+  rateStarters, progressionStaffFactor, avgRating,
+} from './squad.js';
+import { windowOf, generateMarket, generateOffers, expireOffers, returnLoans } from './mercato.js';
+import { FORMATIONS } from './lineup.js';
+import { marketValue, yearsLeft } from './contracts.js';
 
 export const SEASON_WEEKS = 34;
 export const TRAVEL_POINTS = 2;
@@ -97,7 +104,12 @@ export function advanceWeek(save0, data) {
 
   // --- Équipe 1 (Ligue 1)
   const club = clubById(data, fixture.opponent);
+  ensureFirstTeamLineup(save);
+  for (const c of ensureAvailableLineup(save)) report.lines.push(`${fullName(c.in)} remplace ${fullName(c.out)} (indisponible) dans le XI.`);
+  const A0 = save.teams.A;
+  const suspendedNow = A0.players.filter((id) => save.players[id].suspension > 0);
   const aja = firstTeamMatchTeam(save, data, fixture.home, moraleBonus);
+  aja.factor = planFactor(A0.plan, club.style, save.staff?.analyste) * cohesionFactor(save.cohesion);
   const opp = clubTeam(club, { isHome: !fixture.home });
   const home = fixture.home ? aja : opp;
   const away = fixture.home ? opp : aja;
@@ -119,6 +131,14 @@ export function advanceWeek(save0, data) {
   queueAction(save, 'match', { seed: save.seed, season: save.season, week, goalsFor: ajaGoals, goalsAgainst: oppGoals });
   report.l1 = { home: home.name, away: away.name, hg: l1.homeGoals, ag: l1.awayGoals, events: l1.events, outcome: l1Outcome, fromKeyMatch: !!l1.fromKeyMatch };
 
+  // Conséquences : notes, blessures, cartons, cohésion
+  const ajaSide = fixture.home ? 'home' : 'away';
+  const xi = save.teams.A.starters.slice();
+  report.ratings = rateStarters(save, xi, l1.events || [], ajaSide, l1Outcome, streamFor(save, 'ratings'), FORMATIONS[save.teams.A.formation]);
+  report.lines.push(...applyMatchConsequences(save, xi, l1.events || [], ajaSide, streamFor(save, 'injuries')));
+  save.cohesion = updateCohesion(save.cohesion ?? 60, save.teams.A.lastStarters, xi);
+  save.teams.A.lastStarters = xi;
+
   // --- U19
   const u19Opp = u19OpponentOfWeek(data, week);
   const { team: u19, starterIds: u19Starters } = u19MatchTeam(save, u19Opp.home);
@@ -130,6 +150,7 @@ export function advanceWeek(save0, data) {
   const uO = u19Opp.home ? um.awayGoals : um.homeGoals;
   const u19Outcome = uG > uO ? 'V' : uG < uO ? 'D' : 'N';
   save.results.push({ week, comp: 'U19', home: uh.name, away: ua.name, hg: um.homeGoals, ag: um.awayGoals, outcome: u19Outcome });
+  rateStarters(save, u19Starters, um.events, u19Opp.home ? 'home' : 'away', u19Outcome, streamFor(save, 'u19ratings'));
   report.u19 = { home: uh.name, away: ua.name, hg: um.homeGoals, ag: um.awayGoals, outcome: u19Outcome, scorers: um.events.filter((e) => e.type === 'goal' && e.side === (u19Opp.home ? 'home' : 'away')).map((e) => e.playerId) };
 
   // --- Temps de jeu, moral, minutes
@@ -176,6 +197,7 @@ export function advanceWeek(save0, data) {
 
   // --- Progression
   const lvl = save.facilities.terrains;
+  const staffF = progressionStaffFactor(save);
   const track = (p) => {
     const before = overall(p);
     return () => {
@@ -186,15 +208,29 @@ export function advanceWeek(save0, data) {
       if (after !== before && !p.isReal) report.progress.push({ id: p.id, name: fullName(p), from: before, to: after, team: p.team });
     };
   };
+  // Joueurs prêtés : titulaires dans leur club d'accueil
+  for (const l of save.loans || []) {
+    const p = save.players[l.playerId];
+    if (!p || p.team !== 'LOAN') continue;
+    const done = track(p);
+    save.players[p.id] = progressPlayer(p, { facilitiesLevel: 1, playingTime: 'titulaire' });
+    const lp = save.players[p.id];
+    lp.minutesThisSeason += 90;
+    lp.matchStats ||= { apps: 0, goals: 0, ratingSum: 0 };
+    lp.matchStats.apps += 1;
+    lp.matchStats.ratingSum += 6.4;
+    lp.morale = clampM(settle(lp.morale) + 1);
+    done();
+  }
   for (const id of A.players) {
     const done = track(save.players[id]);
-    save.players[id] = progressPlayer(save.players[id], { facilitiesLevel: lvl, playingTime: ptA(id) });
+    save.players[id] = progressPlayer(save.players[id], { facilitiesLevel: lvl, playingTime: ptA(id), extra: staffF });
     done();
   }
   for (const id of save.teams.U19.players) {
     const done = track(save.players[id]);
     const pt = u19Starters.includes(id) ? 'titulaire' : save.teams.U19.playingTime[id] === 'remplacant' ? 'remplacant' : 'aucun';
-    save.players[id] = progressPlayer(save.players[id], { facilitiesLevel: lvl, playingTime: pt });
+    save.players[id] = progressPlayer(save.players[id], { facilitiesLevel: lvl, playingTime: pt, extra: staffF });
     done();
   }
   for (const team of ['U17', 'U15']) {
@@ -236,6 +272,14 @@ export function advanceWeek(save0, data) {
     }
   }
 
+  // --- Mercato : marché à l'ouverture, offres reçues, offres expirées
+  expireOffers(save);
+  if (windowOf(week)) {
+    if (!save.market || save.market.season !== save.season || !windowOf(save.market.week) || windowOf(save.market.week) !== windowOf(week)) generateMarket(save, data);
+    const offers = generateOffers(save, streamFor(save, 'offers'));
+    report.newMessages.push(...offers.map((m) => m.title));
+  }
+
   // --- Messages et événements
   const lost = resolveRivalRisk(save, streamFor(save, 'rival'));
   for (const p of lost) report.lines.push(`Perdu : ${fullName(p)} a signé ailleurs.`);
@@ -244,6 +288,7 @@ export function advanceWeek(save0, data) {
   if (ev) report.newMessages.push(ev.title);
 
   // --- Fin de semaine
+  tickAvailability(save, suspendedNow);
   decayReputation(save);
   report.xp = applyEvent(save, 'week');
   save.travelPointsLeft = travelPointsFor(save);
@@ -299,6 +344,22 @@ export function startNewSeason(save0, data) {
       save.log.push({ week: SEASON_WEEKS, text: txt });
     }
   }
+  returnLoans(save, lines);
+  // Trajectoire de carrière : bilan de la saison de chaque joueur du club
+  const pos = sortedTable(save.table).findIndex((r) => r.id === 'auxerre') + 1;
+  for (const p of Object.values(save.players)) {
+    if (!['A', 'U19', 'U17', 'U15'].includes(p.team)) continue;
+    const ms = p.matchStats || { apps: 0, goals: 0, ratingSum: 0 };
+    (p.careerLog ||= []).push({ season: save.season, team: p.team, age: p.age, ovr: overall(p), apps: ms.apps, goals: ms.goals, avg: avgRating(p), value: marketValue(p, { yearsLeft: yearsLeft(save, p) }), minutes: p.minutesThisSeason });
+    p.matchStats = { apps: 0, goals: 0, ratingSum: 0 };
+    p.yellow = 0;
+  }
+  // Droits TV et prime de classement → budget transferts
+  const prize = Math.round((3 + (19 - pos) * 0.25) * 10) / 10;
+  save.finances.transferBudget = Math.round((save.finances.transferBudget + prize) * 10) / 10;
+  save.finances.history.push({ season: save.season, week: SEASON_WEEKS, type: 'droits TV et classement', player: '', amount: prize });
+  lines.push(`Droits TV et prime de classement (${pos}e) : +${prize} M€ au budget transferts.`);
+  save.market = { season: null, players: [] };
   signFreeAgents(save, data, rng, lines);
   save.negotiations = {};
   for (const [id, p] of Object.entries(save.players)) {

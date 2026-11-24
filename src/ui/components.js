@@ -121,10 +121,11 @@ export const crest = (size = 36) => `
 /** Sous-navigation de l'onglet Club. */
 export const clubNav = (active) => `
   <nav class="subnav" aria-label="Club">
-    <a href="#/team" class="${active === 'team' ? 'on' : ''}">Équipe 1</a>
+    <a href="#/team" class="${active === 'team' ? 'on' : ''}">Équipe</a>
     <a href="#/u19" class="${active === 'u19' ? 'on' : ''}">Formation</a>
+    <a href="#/mercato" class="${active === 'mercato' ? 'on' : ''}">Mercato</a>
     <a href="#/contracts" class="${active === 'contracts' ? 'on' : ''}">Contrats</a>
-    <a href="#/table" class="${active === 'table' ? 'on' : ''}">Classement</a>
+    <a href="#/table" class="${active === 'table' ? 'on' : ''}">Ligue 1</a>
   </nav>`;
 
 /** Barre de progression simple. */
@@ -180,3 +181,35 @@ export function evolutionChart({ real, proj, potential = null, realCaption = 'Sa
       </figcaption>
     </figure>`;
 }
+
+const SC_COLORS = ['#0a3d91', '#3d86d0', '#9aa5b8', '#e3a400'];
+/** Plusieurs scénarios de trajectoire (lignes) depuis la note actuelle. */
+export function scenarioChart({ current, scenarios, potential, chosen }) {
+  const W = 320, H = 170, padL = 30, padR = 54, padT = 14, padB = 26;
+  const vals = [current, potential, ...scenarios.flatMap((s) => s.points.map((p) => p.ovrExact))];
+  let min = Math.floor(Math.min(...vals)) - 1, max = Math.ceil(Math.max(...vals)) + 1;
+  const n = scenarios[0].points.length;
+  const x = (i) => padL + (i / n) * (W - padL - padR);
+  const y = (v) => padT + (1 - (v - min) / (max - min)) * (H - padT - padB);
+  const lines = scenarios.map((s, k) => {
+    const pts = [[x(0), y(current)], ...s.points.map((p, i) => [x(i + 1), y(p.ovrExact)])];
+    const last = s.points[n - 1];
+    const on = s.id === chosen;
+    return `<path d="${pts.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ')}" fill="none" stroke="${SC_COLORS[k % 4]}" stroke-width="${on ? 3.5 : 2}" ${on ? '' : 'stroke-dasharray="5 4"'} stroke-linecap="round"/>
+      <text x="${W - padR + 4}" y="${y(last.ovrExact) + 4}" class="sc-end" fill="${SC_COLORS[k % 4]}">${Math.round(last.ovrExact)}</text>`;
+  }).join('');
+  const ticks = scenarios[0].points.map((p, i) => `<text x="${x(i + 1)}" y="${H - 8}" text-anchor="middle" class="evo-tick">${p.age} ans</text>`).join('');
+  return `
+    <figure class="evo">
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scénarios de trajectoire sur ${n} saisons">
+        <line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" class="evo-axis"/>
+        ${potential ? `<line x1="${padL}" y1="${y(potential)}" x2="${W - padR}" y2="${y(potential)}" class="evo-pot"/><text x="${padL}" y="${y(potential) - 4}" class="evo-pot-t">potentiel ${potential}</text>` : ''}
+        <circle cx="${x(0)}" cy="${y(current)}" r="5" class="evo-now"/>
+        <text x="${x(0) - 6}" y="${y(current) + 4}" text-anchor="end" class="evo-lbl">${Math.round(current)}</text>
+        ${lines}${ticks}
+      </svg>
+      <figcaption class="evo-legend">${scenarios.map((s, k) => `<span><i style="border-top:3px ${s.id === chosen ? 'solid' : 'dashed'} ${SC_COLORS[k % 4]}"></i>${esc(s.label)}${s.id === chosen ? ' (actuel)' : ''}</span>`).join('')}</figcaption>
+    </figure>`;
+}
+
+export const availabilityBadge = (p) => (p.injury ? `<span class="tag-inj" title="${esc(p.injury.label)}">🚑 ${p.injury.weeks} sem.</span>` : p.suspension > 0 ? '<span class="tag-inj">🟥 suspendu</span>' : '');
