@@ -18,7 +18,7 @@ export default {
         </a>`;
     }).join('');
     return `
-      <a class="back" href="#/heritage">‹ Patrimoine</a>
+      <a class="back" href="#/heritage">‹ Musée</a>
       <h2 class="section-title">Livre d’or du centre</h2>
       ${items || '<p class="card muted">Aucun jeune n’est encore monté en équipe 1. Ouvrez la fiche d’un U19 et touchez « Faire monter en équipe 1 ».</p>'}`;
   },

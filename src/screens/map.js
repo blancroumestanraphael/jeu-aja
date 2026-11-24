@@ -7,6 +7,9 @@ import { streamFor } from '../engine/rng.js';
 import { ensureCommunity } from '../engine/community.js';
 import { localMissionOf, doLocalMission } from '../engine/collection.js';
 import { cardHtml } from './heritage.js';
+import * as backend from '../state/backend.js';
+
+let campaigns = null; // opérations partenaires publiées par le serveur (admin)
 
 let selectedCity = null;
 let layers = { aja: true, partners: true };
@@ -113,6 +116,9 @@ export default {
               <span class="small muted">${esc(sponsorDef.category)} · ${st.signed ? `partenaire (${euro(st.budget)}/saison, satisfaction ${st.satisfaction})` : 'pas encore partenaire'}</span></div>
               ${st.signed && !partnerMet ? `<button class="btn btn-small" data-partner="${sponsorDef.id}" ${s.travelPointsLeft < 1 ? 'disabled' : ''}>Découvrir (1 🚗)</button>` : partnerMet ? '<span class="small ok">✓ Découvert</span>' : ''}
             </div>` : ''}
+          ${(campaigns || []).filter((cp) => cp.city === sel.id).map((cp) => `
+            <div class="campaign"><b>🎁 ${esc(cp.partner)}</b> <span class="tag-${cp.status === 'reel' ? 'real' : 'fict'}">${cp.status === 'reel' ? 'partenaire officiel' : 'fictif'}</span><br>
+            <span class="small">Condition : ${esc(cp.condition)} · En jeu : ${esc(cp.rewardInGame)}${cp.rewardReal ? ` · Avantage : ${esc(cp.rewardReal)}` : ''}</span></div>`).join('')}
           <div class="activities">${['sponsor', 'gala'].map(activity).join('')}</div>
         </section>`;
     }
@@ -144,6 +150,10 @@ export default {
   },
 
   bind(root, { store, data, render, go }) {
+    if (campaigns === null) {
+      campaigns = [];
+      backend.checkServer().then((ok) => ok && backend.campaigns()).then((r) => { if (r?.campaigns?.length) { campaigns = r.campaigns; render(); } }).catch(() => {});
+    }
     const pickCity = (id) => {
       selectedCity = id;
       const { save, xp } = discoverCity(store.save, id);

@@ -66,6 +66,7 @@ export function newGame(data, { seed = (Date.now() % 1e9) | 0, userId = 'local' 
     lastReport: null,
     seasonOver: false,
     settings: { demoKeyMatch: true },
+    onboarding: { done: false, step: 0 },
   };
 
   // Équipe 1 : vrais joueurs (EA FC 27)

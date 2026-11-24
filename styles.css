@@ -600,3 +600,37 @@ td.res-D { color: var(--red); font-weight: 700; background: none; }
 .local-m { display: flex; gap: 10px; padding: 10px; border: 1.5px solid var(--line); border-radius: 12px; margin-bottom: 6px; }
 .local-m.done { background: #f2fbf5; border-color: #bfe6cd; }
 .wq .choices .btn { justify-content: flex-start; text-align: left; }
+
+/* --- UX V4 : aujourd'hui, onboarding, niveau, transitions --- */
+.screen.enter { animation: screenIn .22s ease-out; }
+@keyframes screenIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.today { border-top: 5px solid var(--gold); }
+.next-step { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; border-radius: 14px; background: var(--blue); color: #fff; text-decoration: none; border: 0; text-align: left; font: inherit; cursor: pointer; }
+.next-step .eyebrow { color: #d8e5ff; margin: 0; }
+.next-step .chev { color: #fff; }
+.ns-i { font-size: 1.6rem; }
+.objectives { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 2px; }
+.objectives li > a, .objectives li > button { display: flex; gap: 10px; align-items: center; width: 100%; padding: 7px 4px; text-decoration: none; color: var(--ink); background: none; border: 0; font: inherit; text-align: left; cursor: pointer; border-bottom: 1px dashed var(--line); }
+.objectives li > * > span { width: 22px; text-align: center; }
+.objectives li.done > * { color: var(--muted); text-decoration: line-through; }
+.objectives li.done span { color: var(--green); text-decoration: none; font-weight: 900; }
+.reminders { margin-top: 8px; padding: 8px 10px; background: #fff7df; border-radius: 10px; }
+.reminders p { margin: 2px 0; }
+.onb { text-align: center; padding: 8px 4px 4px; }
+.onb-i { display: block; font-size: 3.2rem; margin: 6px 0; }
+.onb-dots { display: flex; justify-content: center; gap: 6px; }
+.onb-dots span { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.onb-dots span.on { background: var(--blue); width: 22px; border-radius: 4px; }
+.onb .choices { justify-content: center; }
+.levelup { position: relative; text-align: center; overflow: hidden; padding: 10px 0 4px; }
+.lu-level { display: inline-grid; place-items: center; width: 84px; height: 84px; border-radius: 26px; background: var(--blue); color: #fff; font-size: 2.6rem; font-weight: 900; animation: pop2 .6s cubic-bezier(.2, 1.6, .4, 1); }
+@keyframes pop2 { from { transform: scale(.2) rotate(-20deg); } to { transform: none; } }
+.confetti { position: absolute; inset: 0; pointer-events: none; }
+.confetti i { position: absolute; top: -10px; left: var(--x); width: 8px; height: 12px; background: var(--c); border: 1px solid rgba(0,0,0,.08); animation: fall 1.6s var(--d) ease-in forwards; }
+@keyframes fall { to { transform: translateY(320px) rotate(540deg); opacity: 0; } }
+.agenda { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.agenda li { display: flex; gap: 10px; align-items: flex-start; }
+.agenda li > span { font-size: 1.3rem; width: 26px; text-align: center; }
+.agenda li.termine { opacity: .55; }
+.campaign { padding: 10px; border-radius: 12px; background: #f2fbf5; border: 1px solid #bfe6cd; margin-bottom: 6px; }
+.tag-real { font-size: .62rem; text-transform: uppercase; letter-spacing: .05em; background: #e7f6ed; color: var(--green); border-radius: 5px; padding: 1px 5px; font-weight: 800; }

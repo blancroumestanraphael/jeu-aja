@@ -17,6 +17,9 @@ import heritage from './screens/heritage.js';
 import contracts from './screens/contracts.js';
 import community from './screens/community.js';
 import mercato from './screens/mercato.js';
+import agenda from './screens/agenda.js';
+import { watchLevelUps } from './ui/onboarding.js';
+import { notifyReminders } from './state/notify.js';
 import profile from './screens/profile.js';
 import { touchDay, isoDay } from './engine/community.js';
 import { initErrorTracking } from './state/telemetry.js';
@@ -25,7 +28,7 @@ import { SAVE_VERSION } from './engine/migrations.js';
 
 initErrorTracking(`save-v${SAVE_VERSION}`);
 
-const SCREENS = { home, team, u19, player, map, messages, match, table, gold, supporter, heritage, contracts, community, profile, mercato, welcome };
+const SCREENS = { home, team, u19, player, map, messages, match, table, gold, supporter, heritage, contracts, community, profile, mercato, agenda, welcome };
 // 5 onglets orientés supporter ; les messages passent dans l'en-tête.
 const TABS = [
   { id: 'home', label: 'Accueil', icon: '<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/>' },
@@ -80,9 +83,10 @@ function tabbar(active) {
     </nav>`;
 }
 
-const TAB_OF = { player: null, match: null, messages: null, table: 'team', u19: 'team', contracts: 'team', mercato: 'team', community: 'supporter', profile: 'supporter', gold: 'heritage' };
+const TAB_OF = { player: null, match: null, messages: null, agenda: 'home', table: 'team', u19: 'team', contracts: 'team', mercato: 'team', community: 'supporter', profile: 'supporter', gold: 'heritage' };
 
 let currentCleanup = null;
+let lastRoute = null;
 
 export function render() {
   currentCleanup?.();
@@ -92,11 +96,14 @@ export function render() {
   const screen = SCREENS[route.name];
   const ctx = { store, data, go, render, param: route.param };
   const body = screen.render(ctx);
+  const changed = lastRoute !== route.name;
+  lastRoute = route.name;
   const activeTab = route.name in TAB_OF ? TAB_OF[route.name] : route.name;
   app.innerHTML = save && route.name !== 'welcome'
     ? `${header(save)}<main class="screen screen-${route.name}" id="main">${body}</main>${screen.fullscreen ? '' : tabbar(activeTab)}`
     : `<main class="screen screen-welcome">${body}</main>`;
   const root = app.querySelector('main');
+  if (changed && root) root.classList.add('enter'); // transition douce entre les espaces
   currentCleanup = screen.bind?.(root, ctx) || null;
   if (!screen.keepScroll) window.scrollTo(0, 0);
 }
@@ -114,6 +121,8 @@ async function boot() {
   }
   window.addEventListener('hashchange', render);
   startAutoSync(store);
+  watchLevelUps(store);
+  notifyReminders(store, data);
   render();
 }
 

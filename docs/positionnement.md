@@ -1,5 +1,21 @@
 # Génération AJA — d'un jeu de gestion à un outil d'engagement supporter
 
+## État V4 : une plateforme d'engagement dont le jeu est le moteur
+
+| Phase | Livré dans le prototype |
+| --- | --- |
+| 1. Consolidation | Équilibrage vérifié (`npm run balance`), sauvegardes versionnées avec migrations, export/import, journal d'erreurs |
+| 2. Communauté connectée | Serveur partagé ; classements général, communes, départements, ancienneté, accomplissements, groupes, générations ; défis de territoire (10 000 actions dans l'Yonne) et événements limités ; groupes de supporters ; profils publics ; anti-triche côté serveur |
+| 3. Gameplay enrichi | Mercato (achats, ventes, offres reçues), prêts, blessures et suspensions, cohésion, staff, plan de jeu contre l'adversaire, finances, trajectoires de carrière à 4 saisons |
+| 4. Expérience AJA | Musée (époques, matchs historiques, palmarès, légendes, archives), quiz de la semaine, 52 cartes à collectionner, missions locales dans les communes |
+| 5. UX et exploitation | Tutoriel, « prochaine étape » et objectifs du jour, rappels, agenda, animations de niveau ; tableau de bord admin (rétention, événements, campagnes partenaires fictives ou réelles) ; architecture documentée |
+
+Les trois dimensions se renforcent mutuellement :
+
+- **Jeu** : chaque semaine jouée alimente les défis collectifs. Les niveaux supporter donnent des bonus dans le jeu.
+- **Communauté** : classements, groupes, défis communs et défis entre générations.
+- **Territoire** : les missions des communes débloquent le recrutement, alimentent la Coupe des communes et donnent des cartes à collectionner.
+
 Prototype existant, à faire évoluer avec le club : il ne s'agit pas de repartir de zéro, mais de mettre la gestion sportive (le cœur ludique) au service de la relation avec les supporters de l'AJA et du territoire de l'Yonne.
 
 ## Positionnement

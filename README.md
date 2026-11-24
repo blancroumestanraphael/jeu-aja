@@ -11,28 +11,33 @@ Prototype de jeu mobile (PWA) pour **fidéliser les supporters de l'AJ Auxerre**
 Positionnement, parcours, feuille de route et mesure de l'engagement : voir [`docs/positionnement.md`](docs/positionnement.md).
 ## Lancer le jeu
 
-Aucun build : HTML/CSS/JavaScript vanilla (modules ES). Il suffit d'un serveur statique :
-
 ```bash
-python3 -m http.server 5173
+npm install
+npm start
 ```
 
-puis ouvrir http://localhost:5173 (sur téléphone : « Ajouter à l'écran d'accueil »).
+Le jeu et l'API communautaire tournent alors sur http://localhost:5173. Le tableau de bord administrateur est sur `/admin.html`, avec le jeton `admin-dev`. Sur téléphone, utiliser « Ajouter à l'écran d'accueil ». Sans serveur, avec un simple `python3 -m http.server`, le jeu reste jouable : les actions communautaires attendent dans la sauvegarde.
 
-Déploiement Netlify : connecter le dépôt GitHub, dossier publié = racine (`netlify.toml` fourni).
+Le déploiement sur Netlify (site statique + fonction `/api`), la sécurité et le passage à l'exploitation sont décrits dans [`docs/architecture.md`](docs/architecture.md).
 
 ## Tests
 
 ```bash
 npm test
+npm run balance
 ```
 
-Tests du moteur et de la progression supporter (Node ≥ 20, sans dépendance) : même graine = même match, formule de progression, saison complète de 34 semaines déterministe, activités de la carte, Match de la veille, montée en équipe 1, missions de commune, défis hebdomadaires par saison, effets des niveaux, mobilisation, formés installés, ancienneté, patrimoine, partenaires.
+- **`npm test`** : 59 tests sur le moteur, le serveur (y compris par HTTP), l'anti-triche, les migrations, la communauté, le mercato, le musée et l'agenda.
+- **`npm run balance`** : contrôle d'équilibrage sur 30 saisons simulées.
 
 ## Organisation
 
 ```
 index.html, styles.css, manifest.json, sw.js   PWA (installation + cache hors ligne)
+admin.html, src/admin                          tableau de bord administrateur
+server/                                        API communautaire (cœur pur, routeur, stockage, serveur de dev)
+netlify/functions/api.mjs                      la même API en fonction Netlify
+scripts/balance.mjs                            contrôle d'équilibrage
 src/data     contenu en JSON (joueurs, clubs, calendrier, villes, communes, patrimoine, partenaires, centre, commentaires)
 src/engine   simulation pure + territoire, patrimoine et espace supporter (community.js), sans DOM, hasard à graine
 src/state    état de la partie + sauvegarde (localStorage, Firestore si configuré)

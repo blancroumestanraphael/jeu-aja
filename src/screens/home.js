@@ -7,6 +7,9 @@ import { missionDone } from '../engine/activities.js';
 import { STAFF, staffCost } from '../engine/squad.js';
 import { openDailyPack } from '../engine/collection.js';
 import { showReward } from './heritage.js';
+import { dailyObjectives, reminders } from '../engine/guide.js';
+import { maybeOnboarding } from '../ui/onboarding.js';
+import { enableNotifications, notificationsSupported } from '../state/notify.js';
 import { advanceWeek, startNewSeason, fixtureOfWeek, clubById, u19OpponentOfWeek, SEASON_WEEKS } from '../engine/week.js';
 import { canPlayKeyMatch } from '../engine/keymatch.js';
 import { sortedTable } from '../engine/league.js';
@@ -74,7 +77,7 @@ export default {
     const answeredToday = c.daily.date === today && c.daily.answered;
     const daily = `
       <section class="card daily">
-        <div class="card-head"><h3>📜 La question du jour</h3><a class="link" href="#/heritage">Patrimoine ›</a></div>
+        <div class="card-head"><h3>📜 La question du jour</h3><a class="link" href="#/heritage">Musée ›</a></div>
         ${answeredToday
           ? `<p>${esc(q.q)}</p><p class="${c.daily.correct ? 'ok' : 'warn'}"><b>${c.daily.correct ? 'Bravo !' : 'Raté…'}</b> Réponse : ${esc(q.choices[q.answer])}. Revenez demain pour une nouvelle question.</p>`
           : `<p>${esc(q.q)}</p><div class="choices col">${q.choices.map((ch, i) => `<button class="btn" data-daily="${i}">${esc(ch)}</button>`).join('')}</div>`}
@@ -119,11 +122,10 @@ export default {
         </section>`;
 
     return `
+      ${todayCard(s, data, today)}
       ${rendezVous}
       ${supporterStrip}
-      ${s.collection?.lastPack !== today ? `<button class="card pack-cta" data-action="pack"><span class="pk-i">🃏</span><span><b>Votre carte du jour</b><br><span class="small muted">Une carte de l’histoire de l’AJA à ajouter à votre collection</span></span><span class="chev">›</span></button>` : ''}
       ${daily}
-      ${mission}
       ${nextMatch}
 
       <section class="grid-3">
@@ -168,12 +170,13 @@ export default {
 
       <section class="links">
         <a class="btn btn-ghost" href="#/table">Classement</a>
-        <button class="btn btn-ghost" data-action="calendar">Rendez-vous</button>
+        <a class="btn btn-ghost" href="#/agenda">Agenda</a>
         <button class="btn btn-ghost" data-action="settings">Réglages</button>
       </section>`;
   },
 
   bind(root, { store, data, go, render }) {
+    maybeOnboarding(store, render);
     root.addEventListener('click', async (e) => {
       const d = e.target.closest('[data-daily]');
       if (d) {
@@ -250,6 +253,9 @@ function showSettings(store, render) {
   const cloud = store.cloud;
   openModal(`
     <div class="modal-head"><h3>Réglages</h3><button class="icon-btn" data-close aria-label="Fermer">✕</button></div>
+    ${notificationsSupported() ? `<button class="btn btn-small" data-k="notif">${Notification.permission === 'granted' ? '🔔 Rappels activés' : '🔔 Activer les rappels sur cet appareil'}</button>
+    <p class="small muted">Un rappel utile par jour au plus : Match de la veille, quiz, match de l’AJA.</p>` : ''}
+    <p class="small"><button class="linkish small" data-k="tuto">Revoir le tutoriel</button></p>
     <label class="toggle"><input type="checkbox" data-k="demo" ${s.settings.demoKeyMatch ? 'checked' : ''}>
       <span>Match de la veille jouable à tout moment (mode démo)</span></label>
     <p class="small muted">Désactivé : le Match de la veille ne s’ouvre que la veille du vrai match, de 18 h à minuit.</p>
@@ -268,6 +274,15 @@ function showSettings(store, render) {
     <hr>
     <button class="btn btn-danger" data-k="reset">Recommencer une nouvelle partie</button>`, {
     onBind(m) {
+      m.querySelector('[data-k="notif"]')?.addEventListener('click', async () => {
+        toast((await enableNotifications()) ? 'Rappels activés' : 'Rappels refusés par le navigateur');
+        closeModal();
+      });
+      m.querySelector('[data-k="tuto"]').addEventListener('click', () => {
+        store.update((x) => { x.onboarding = { done: false, step: 0 }; });
+        closeModal();
+        render();
+      });
       m.querySelector('[data-k="demo"]').addEventListener('change', (e) => {
         store.update((x) => { x.settings.demoKeyMatch = e.target.checked; });
         render();
@@ -331,4 +346,20 @@ function download(name, text) {
   a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+function todayCard(s, data, today) {
+  const objs = dailyObjectives(s, data, today);
+  const next = objs.find((o) => !o.done);
+  const done = objs.filter((o) => o.done).length;
+  const rem = reminders(s, data, today);
+  const link = (o, cls = '') => (o.action ? `<button class="${cls}" data-action="${o.action}">` : `<a class="${cls}" href="${o.href}">`);
+  const end = (o) => (o.action ? '</button>' : '</a>');
+  return `
+    <section class="card today">
+      <div class="card-head"><h3>Aujourd’hui</h3><span class="chip">${done}/${objs.length}</span></div>
+      ${next ? `${link(next, 'next-step')}<span class="ns-i">${next.icon}</span><span><span class="eyebrow">Prochaine étape</span><br><b>${esc(next.title)}</b></span><span class="chev">›</span>${end(next)}` : ''}
+      <ul class="objectives">${objs.filter((o) => o !== next).slice(0, 5).map((o) => `<li class="${o.done ? 'done' : ''}">${link(o)}<span>${o.done ? '✓' : o.icon}</span>${esc(o.title)}${end(o)}</li>`).join('')}</ul>
+      ${rem.length ? `<div class="reminders">${rem.map((r) => `<p class="small">${r.icon} ${r.href ? `<a href="${r.href}">${esc(r.text)}</a>` : esc(r.text)}</p>`).join('')}</div>` : ''}
+    </section>`;
 }
