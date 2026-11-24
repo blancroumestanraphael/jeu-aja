@@ -8,6 +8,7 @@ import { advanceWeek, startNewSeason, fixtureOfWeek, clubById, u19OpponentOfWeek
 import { canPlayKeyMatch } from '../engine/keymatch.js';
 import { sortedTable } from '../engine/league.js';
 import { signInWithGoogle } from '../state/store.js';
+import { readErrors, clearErrors } from '../state/telemetry.js';
 
 const FAC = {
   terrains: { label: 'Terrains d’entraînement', effect: '+10 % de progression des jeunes par niveau' },
@@ -233,6 +234,11 @@ function showSettings(store, render) {
     ${cloud.enabled && !cloud.user ? '<button class="btn" data-k="login">Se connecter avec Google</button>' : ''}
     <p class="small muted">Graine de la partie : ${s.seed}</p>
     <hr>
+    <p class="small"><b>Sauvegarde</b> (version ${s.version}) : exportez votre partie pour la garder ou la transférer.</p>
+    <div class="choices"><button class="btn" data-k="save-export">Exporter la partie</button>
+    <label class="btn">Importer une partie<input type="file" accept="application/json" data-k="save-import" hidden></label></div>
+    ${readErrors().length ? `<p class="small warn">${readErrors().length} erreur(s) enregistrée(s) sur cet appareil. <button class="linkish small" data-k="errors">Voir / effacer</button></p>` : ''}
+    <hr>
     <p class="small"><b>Mesure de l’engagement</b> (panel de test) : exportez vos statistiques de jeu, sans donnée personnelle.</p>
     <button class="btn" data-k="export">Exporter mes statistiques (JSON)</button>
     <hr>
@@ -246,12 +252,25 @@ function showSettings(store, render) {
         try { await signInWithGoogle(); store.persist(); closeModal(); toast('Connecté'); } catch { toast('Connexion impossible'); }
       });
       m.querySelector('[data-k="export"]').addEventListener('click', () => {
-        const blob = new Blob([JSON.stringify(engagementExport(store.save), null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `generation-aja-engagement-${isoDay()}.json`;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        download(`generation-aja-engagement-${isoDay()}.json`, JSON.stringify(engagementExport(store.save), null, 2));
+      });
+      m.querySelector('[data-k="save-export"]').addEventListener('click', () => {
+        download(`generation-aja-${s.season}-S${s.week}.json`, store.exportSave());
+      });
+      m.querySelector('[data-k="save-import"]').addEventListener('change', async (e) => {
+        const f = e.target.files?.[0];
+        if (!f) return;
+        try {
+          if (!confirm('Remplacer la partie en cours par celle du fichier ?')) return;
+          store.importSave(await f.text());
+          closeModal();
+          toast('Partie importée');
+          render();
+        } catch (err) { toast(`Import impossible : ${err.message}`); }
+      });
+      m.querySelector('[data-k="errors"]')?.addEventListener('click', () => {
+        alert(readErrors().map((x) => `${x.at} ${x.route || ''}\n${x.msg}`).join('\n\n'));
+        if (confirm('Effacer le journal d’erreurs ?')) { clearErrors(); closeModal(); }
       });
       m.querySelector('[data-k="reset"]').addEventListener('click', () => {
         if (confirm('Effacer la partie en cours et recommencer ?')) {
@@ -279,4 +298,13 @@ export function engagementExport(s) {
     challengesClaimed: c.claimedChallenges.length,
     goldenBook: s.goldenBook.length,
   };
+}
+
+function download(name, text) {
+  const blob = new Blob([text], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }

@@ -16,6 +16,10 @@ import supporter from './screens/supporter.js';
 import heritage from './screens/heritage.js';
 import contracts from './screens/contracts.js';
 import { touchDay, isoDay } from './engine/community.js';
+import { initErrorTracking } from './state/telemetry.js';
+import { SAVE_VERSION } from './engine/migrations.js';
+
+initErrorTracking(`save-v${SAVE_VERSION}`);
 
 const SCREENS = { home, team, u19, player, map, messages, match, table, gold, supporter, heritage, contracts, welcome };
 // 5 onglets orientés supporter ; les messages passent dans l'en-tête.

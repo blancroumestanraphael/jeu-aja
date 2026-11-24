@@ -80,6 +80,9 @@ export function u19MatchTeam(save, isHome) {
 }
 
 const clampM = (m) => Math.max(10, Math.min(100, m));
+export const MORALE_BASE = 68;
+/** Le moral revient progressivement vers la normale (15 % de l'écart par semaine). */
+const settle = (m) => m + (MORALE_BASE - m) * 0.15;
 
 export function advanceWeek(save0, data) {
   const save = structuredClone(save0);
@@ -149,8 +152,8 @@ export function advanceWeek(save0, data) {
         save.log.push({ week, text: `${fullName(p)} s\u2019installe en équipe 1.` });
       }
     }
-    if (pt !== 'aucun') p.morale = clampM(p.morale + moraleDelta[l1Outcome]);
-    else p.morale = clampM(p.morale - 1);
+    if (pt !== 'aucun') p.morale = clampM(settle(p.morale) + moraleDelta[l1Outcome]);
+    else p.morale = clampM(settle(p.morale) - 1);
     // Jeune monté trop tôt : −5 de moral par match joué
     if (!p.isReal && pt !== 'aucun' && overall(p) < startersAvg - 10) {
       p.morale = clampM(p.morale - 5);
@@ -163,7 +166,7 @@ export function advanceWeek(save0, data) {
     const pt = save.teams.U19.playingTime[id] || 'aucun';
     if (played) p.minutesThisSeason += 90;
     else if (pt === 'remplacant') p.minutesThisSeason += 20;
-    p.morale = clampM(p.morale + (played ? 1 + moraleDelta[u19Outcome] / 2 : pt === 'remplacant' ? 0 : -2));
+    p.morale = clampM(settle(p.morale) + (played ? 1 + moraleDelta[u19Outcome] / 2 : pt === 'remplacant' ? 0 : -2));
   }
 
   // --- Promesses de temps de jeu faites lors des négociations

@@ -512,3 +512,4 @@ td.res-D { color: var(--red); font-weight: 700; background: none; }
 .ctr-sum > div { display: flex; flex-direction: column; }
 .ctr-sum b { font-size: 1.2rem; color: var(--blue); }
 .subnav a { font-size: .8rem; }
+.warn-box { background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.4); border-radius: 12px; padding: 8px 10px; max-width: 340px; }

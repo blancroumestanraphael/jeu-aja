@@ -1,7 +1,7 @@
-import { crest } from '../ui/components.js';
+import { crest, esc } from '../ui/components.js';
 
 export default {
-  render({ data }) {
+  render({ data, store }) {
     return `
       <div class="welcome">
         ${crest(96)}
@@ -13,6 +13,7 @@ export default {
           <li>🌱 Centre de formation : U19 gérés, U17 et U15 simulés</li>
           <li>🗺️ 8 villes de l’Yonne à conquérir</li>
         </ul>
+        ${store.loadError ? `<p class="small warn-box">Votre sauvegarde n’a pas pu être chargée : ${esc(store.loadError)} Une copie est conservée sur l’appareil.</p>` : ''}
         <button class="btn btn-primary btn-big" data-action="new">Nouvelle partie</button>
         <p class="muted small">Jeu non officiel, sans lien avec l’AJ Auxerre. Sauvegarde automatique sur cet appareil.</p>
       </div>`;

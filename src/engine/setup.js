@@ -4,10 +4,9 @@ import { createRng, hashSeed } from './rng.js';
 import { fromRealPlayer, generateYouth } from './players.js';
 import { autoLineup } from './lineup.js';
 import { initTable } from './league.js';
-import { ensureCommunity } from './community.js';
-import { ensureContracts } from './contracts.js';
 
-export const SAVE_VERSION = 1;
+import { SAVE_VERSION, migrateSave } from './migrations.js';
+export { SAVE_VERSION };
 
 export function cityById(data, id) {
   return data.cities.cities.find((c) => c.id === id) || data.academy.otherCities.find((c) => c.id === id) || null;
@@ -100,7 +99,5 @@ export function newGame(data, { seed = (Date.now() % 1e9) | 0, userId = 'local' 
       });
     }
   }
-  ensureCommunity(save);
-  ensureContracts(save, data);
-  return save;
+  return migrateSave(save, data).save; // ajoute les champs des versions récentes
 }

@@ -24,7 +24,8 @@ const WEIGHTS_CARD = { GK: 0.2, DEF: 2, MIL: 1.5, ATT: 0.6 };
 
 export function teamStrength(team) {
   const tactic = TACTICS[team.tactic] || TACTICS.equilibre;
-  const moraleFactor = 0.85 + 0.3 * ((team.morale ?? 70) / 100);
+  // Moral : effet modéré (0,92 à 1,08) pour éviter les spirales de défaites
+  const moraleFactor = 0.92 + 0.16 * ((team.morale ?? 70) / 100);
   return team.rating * tactic.strength * moraleFactor * (team.isHome ? HOME_BONUS : 1);
 }
 

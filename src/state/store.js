@@ -1,11 +1,13 @@
 // État de la partie + sauvegarde (localStorage, et Firestore si Firebase est configuré).
 
-import { newGame, SAVE_VERSION } from '../engine/setup.js';
+import { newGame } from '../engine/setup.js';
+import { migrateSave } from '../engine/migrations.js';
 import { firebaseConfig } from './firebase-config.js';
 import { touchDay, isoDay } from '../engine/community.js';
-import { ensureContracts } from '../engine/contracts.js';
 
-const LOCAL_KEY = 'generation-aja-save-v' + SAVE_VERSION;
+const LOCAL_KEY = 'generation-aja-save';
+const LEGACY_KEYS = ['generation-aja-save-v1'];
+const BACKUP_KEY = 'generation-aja-backup';
 
 const DATA_FILES = ['players', 'clubs', 'fixtures', 'cities', 'sponsors', 'academy', 'commentary', 'territory', 'heritage'];
 
@@ -23,7 +25,7 @@ export async function loadData() {
 
 function readLocal() {
   try {
-    const raw = localStorage.getItem(LOCAL_KEY);
+    const raw = localStorage.getItem(LOCAL_KEY) ?? LEGACY_KEYS.map((k) => localStorage.getItem(k)).find(Boolean);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -99,8 +101,21 @@ export function createStore(data) {
       const cloud = await readCloud().catch(() => null);
       const local = readLocal();
       save = cloud && (!local || cloud.seasonIndex * 100 + cloud.week >= local.seasonIndex * 100 + local.week) ? cloud : local;
-      if (save && save.version !== SAVE_VERSION) save = null;
-      if (save) ensureContracts(save, data); // anciennes sauvegardes sans contrats
+      if (save) {
+        try {
+          const { save: up, migrated } = migrateSave(save, data);
+          if (migrated.length) {
+            try { localStorage.setItem(BACKUP_KEY, JSON.stringify(save)); } catch { /* rien */ }
+            console.info(`Sauvegarde migrée vers v${up.version}`);
+          }
+          save = up;
+        } catch (e) {
+          console.warn(e);
+          store.loadError = e.message;
+          try { localStorage.setItem(BACKUP_KEY, JSON.stringify(save)); } catch { /* rien */ }
+          save = null;
+        }
+      }
       return !!save;
     },
     newGame(seed) {
@@ -120,6 +135,17 @@ export function createStore(data) {
       writeLocal(save);
       writeCloud(save);
       listeners.forEach((l) => l(save));
+    },
+    /** Export JSON de la partie. */
+    exportSave() {
+      return JSON.stringify(save);
+    },
+    /** Import d'une partie (vérifiée et migrée). */
+    importSave(json) {
+      const { save: up } = migrateSave(JSON.parse(json), data);
+      save = up;
+      store.persist();
+      return up;
     },
     reset() {
       try { localStorage.removeItem(LOCAL_KEY); } catch { /* rien */ }
